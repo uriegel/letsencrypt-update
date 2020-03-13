@@ -1,3 +1,6 @@
 {
-    "account": "uriegel@hotmail.de"
+    "account": "uriegel@hotmail.de",
+    "domains": [
+        "uriegel.de"
+    ]
 }

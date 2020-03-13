@@ -2,10 +2,12 @@ namespace UwebServerCert
 {
     class CertRequest
     {
-        public CertRequest(string account)
+        public CertRequest(string account, string[] domains)
         {
-            this.account = account;
+            Account = account;
+            Domains = domains;
         }
-        public string account { get; }
+        public string Account { get; }
+        public string[] Domains { get; }
     }
 }
