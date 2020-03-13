@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Certes;
 using Certes.Acme;
@@ -96,11 +97,44 @@ namespace UwebServerCert
 
                 Console.WriteLine($"Registering domains: {String.Join(", ", certRequest.Domains)}"); 
                 var order = await acmeContext.NewOrder(certRequest.Domains);
-                var authz = (await order.Authorizations()).First();
-                var httpChallenge = await authz.Http();
-                var keyAuthz = httpChallenge.KeyAuthz;
-                var token = httpChallenge.Token;
-                await File.WriteAllTextAsync(Path.Combine(encryptDirectory, "token"), keyAuthz);
+
+                var autorizations = (await order.Authorizations()).ToArray();
+                Console.WriteLine($"Authorizations: {autorizations.Length}"); 
+                
+                foreach (var autorization in autorizations)
+                {
+                    var httpChallenge = await autorization.Http();
+                    var keyAuthz = httpChallenge.KeyAuthz;
+                    var token = httpChallenge.Token;
+                    await File.WriteAllTextAsync(Path.Combine(encryptDirectory, "token"), keyAuthz);
+                    
+                    Console.WriteLine($"Validating LetsEncrypt token"); 
+                    var challenge = await httpChallenge.Validate();
+                    Console.WriteLine($"Challenge: {challenge.Error}, {challenge.Status} {challenge.Validated}"); 
+                    Thread.Sleep(5000);
+                    Console.WriteLine($"Validating LetsEncrypt token"); 
+                    challenge = await httpChallenge.Validate();
+                    Console.WriteLine($"Challenge: {challenge.Error}, {challenge.Status} {challenge.Validated}"); 
+                }
+
+                Console.WriteLine($"Ordering certificate"); 
+                var privateKey = KeyFactory.NewKey(KeyAlgorithm.ES256);
+                var cert = await order.Generate(new CsrInfo
+                {
+                    CountryName = certRequest.Data.CountryName,
+                    State = certRequest.Data.State,
+                    Locality = certRequest.Data.Locality,
+                    Organization = certRequest.Data.Organization,
+                    OrganizationUnit = certRequest.Data.OrganizationUnit,
+                    CommonName = certRequest.Data.CommonName,
+                }, privateKey);
+
+                Console.WriteLine($"Creating certificate"); 
+                var certPem = cert.ToPem();
+                var pfxBuilder = cert.ToPfx(privateKey);
+                var pfx = pfxBuilder.Build("uriegel.de", "uriegel");
+                Console.WriteLine($"Saving certificate"); 
+                File.WriteAllBytes(Path.Combine(encryptDirectory, "certificate.pfx"), pfx);
             }
             catch (Exception e)
             {
