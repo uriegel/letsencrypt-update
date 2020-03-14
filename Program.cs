@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Certes;
 using Certes.Acme;
@@ -17,7 +16,7 @@ namespace UwebServerCert
             Console.WriteLine("Creating letsencrypt account");
 
             var certRequest = ReadRequest("cert.json");
-            File.Copy("cert.json", Path.Combine(encryptDirectory, "cert.json"));
+            File.Copy("cert.json", certRequestFile);
 
             acmeContext = new AcmeContext(staging ? WellKnownServers.LetsEncryptStagingV2 : WellKnownServers.LetsEncryptV2);
             account = await acmeContext.NewAccount(certRequest.Account, true);
@@ -45,17 +44,12 @@ namespace UwebServerCert
             Console.WriteLine("Deleting letsencrypt account");
             try 
             {
-                File.Delete(Path.Combine(encryptDirectory, "cert.json"));
+                File.Delete(certRequestFile);
             }
             catch {}
             try 
             {
                 File.Delete(accountFile);
-            }
-            catch {}
-            try 
-            {
-                File.Delete(Path.Combine(encryptDirectory, "token"));
             }
             catch {}
             Console.WriteLine("Letsencrypt account deleted");
@@ -71,10 +65,44 @@ namespace UwebServerCert
             return serializer.Deserialize(file, typeof(CertRequest)) as CertRequest;
         }
 
+        async static Task ValidateAsync(IAuthorizationContext authorization)
+        {
+            try 
+            {
+                var httpChallenge = await authorization.Http();
+                var keyAuthz = httpChallenge.KeyAuthz;
+                var token = httpChallenge.Token;
+                Console.WriteLine($"Validating LetsEncrypt token: {token}"); 
+                await File.WriteAllTextAsync(Path.Combine(encryptDirectory, "token"), keyAuthz);
+
+                while (true)
+                {
+                    var challenge = await httpChallenge.Validate();
+                    Console.WriteLine($"Challenge: {challenge.Error}, {challenge.Status} {challenge.Validated}"); 
+                    if (challenge.Status == Certes.Acme.Resource.ChallengeStatus.Invalid)
+                    {
+                        Console.WriteLine($"Could not validate LetsEncrypt token: {token}"); 
+                        throw new Exception("Not valid");
+                    }
+                    if (challenge.Status == Certes.Acme.Resource.ChallengeStatus.Valid)
+                        break;
+                    await Task.Delay(2000);
+                }
+            }
+            finally
+            {
+                try 
+                {
+                    File.Delete(Path.Combine(encryptDirectory, "token"));
+                }
+                catch {}
+            }
+        }
+
         // Parameter: -prod: productive, without: staging (test)
         // Parameter: -del: delete account
         // Parameter: -create: read file cert.json
-        static async Task Main(string[] args)
+        async static Task Main(string[] args)
         {
             try 
             {
@@ -84,6 +112,10 @@ namespace UwebServerCert
                 bool deleteAccount = args.Contains("-del");
                 bool createAccount = args.Contains("-create");
                 Console.WriteLine(staging ? "Staging" : "!!! P R O D U C T I V E !!!");
+
+                accountFile = Path.Combine(encryptDirectory, $"access{(staging ? "-staging" : "")}.pem");            
+                certRequestFile = Path.Combine(encryptDirectory, $"cert{(staging ? "-staging" : "")}.json");            
+                
                 CertRequest certRequest = null;
                 if (deleteAccount)
                 {
@@ -96,27 +128,12 @@ namespace UwebServerCert
                     certRequest = await ReadAccountAsync(staging);
 
                 Console.WriteLine($"Registering domains: {String.Join(", ", certRequest.Domains)}"); 
+
                 var order = await acmeContext.NewOrder(certRequest.Domains);
-
-                var autorizations = (await order.Authorizations()).ToArray();
-                Console.WriteLine($"Authorizations: {autorizations.Length}"); 
-                
-                foreach (var autorization in autorizations)
-                {
-                    var httpChallenge = await autorization.Http();
-                    var keyAuthz = httpChallenge.KeyAuthz;
-                    var token = httpChallenge.Token;
-                    await File.WriteAllTextAsync(Path.Combine(encryptDirectory, "token"), keyAuthz);
-                    
-                    Console.WriteLine($"Validating LetsEncrypt token"); 
-                    var challenge = await httpChallenge.Validate();
-                    Console.WriteLine($"Challenge: {challenge.Error}, {challenge.Status} {challenge.Validated}"); 
-                    Thread.Sleep(5000);
-                    Console.WriteLine($"Validating LetsEncrypt token"); 
-                    challenge = await httpChallenge.Validate();
-                    Console.WriteLine($"Challenge: {challenge.Error}, {challenge.Status} {challenge.Validated}"); 
-                }
-
+                var authorizations = (await order.Authorizations()).ToArray();
+                foreach (var authorization in authorizations)
+                    await ValidateAsync(authorization);
+        
                 Console.WriteLine($"Ordering certificate"); 
                 var privateKey = KeyFactory.NewKey(KeyAlgorithm.ES256);
                 var cert = await order.Generate(new CsrInfo
@@ -134,7 +151,7 @@ namespace UwebServerCert
                 var pfxBuilder = cert.ToPfx(privateKey);
                 var pfx = pfxBuilder.Build("uriegel.de", "uriegel");
                 Console.WriteLine($"Saving certificate"); 
-                File.WriteAllBytes(Path.Combine(encryptDirectory, "certificate.pfx"), pfx);
+                File.WriteAllBytes(Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx"), pfx);
             }
             catch (Exception e)
             {
@@ -145,15 +162,11 @@ namespace UwebServerCert
                 Console.WriteLine("Letsencrypt certificate handling finished");
             }
         }
-        
-        static Program()
-        {
-            accountFile = Path.Combine(encryptDirectory, "access.pem");            
-        }
 
         static AcmeContext acmeContext;
         static IAccountContext account;
         const string encryptDirectory = "/etc/letsencrypt-uweb";
-        static readonly string accountFile;
+        static string accountFile;
+        static string certRequestFile;
     }
 }
