@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Certes;
 using Certes.Acme;
@@ -113,9 +114,19 @@ namespace UwebServerCert
                 bool createAccount = args.Contains("-create");
                 Console.WriteLine(staging ? "Staging" : "!!! P R O D U C T I V E !!!");
 
+                var certificateFile = Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx");
                 accountFile = Path.Combine(encryptDirectory, $"access{(staging ? "-staging" : "")}.pem");            
                 certRequestFile = Path.Combine(encryptDirectory, $"cert{(staging ? "-staging" : "")}.json");            
-                
+
+                var certificate = new X509Certificate2(certificateFile, "uriegel");
+
+                Console.WriteLine($"Certificate expires: {certificate.NotAfter}");
+                if (certificate.NotAfter > DateTime.Now + TimeSpan.FromDays(30))
+                {
+                    Console.WriteLine("No further action needed");
+                    return;
+                }
+
                 CertRequest certRequest = null;
                 if (deleteAccount)
                 {
@@ -149,9 +160,13 @@ namespace UwebServerCert
                 Console.WriteLine($"Creating certificate"); 
                 var certPem = cert.ToPem();
                 var pfxBuilder = cert.ToPfx(privateKey);
-                var pfx = pfxBuilder.Build("uriegel.de", "uriegel");
+
+                var passwordFile = Path.Combine(encryptDirectory, $"passwd{(staging ? "-staging" : "")}");
+                var passwd = Guid.NewGuid().ToString();
+                File.WriteAllText(passwordFile, passwd);
+                var pfx = pfxBuilder.Build(certRequest.Data.CommonName, passwd);
                 Console.WriteLine($"Saving certificate"); 
-                File.WriteAllBytes(Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx"), pfx);
+                File.WriteAllBytes(certificateFile, pfx);
             }
             catch (Exception e)
             {
