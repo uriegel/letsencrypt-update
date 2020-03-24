@@ -10,6 +10,9 @@ using Newtonsoft.Json.Serialization;
 
 namespace UwebServerCert
 {
+    // TO build: 
+    // dotnet publish -c Release
+
     class Program
     {
         static async Task<CertRequest> CreateAccountAsync(bool staging)
@@ -17,6 +20,11 @@ namespace UwebServerCert
             Console.WriteLine("Creating letsencrypt account");
 
             var certRequest = ReadRequest("cert.json");
+
+            var fileInfo = new FileInfo(certRequestFile);
+            if (!fileInfo.Directory.Exists)
+                Directory.CreateDirectory(fileInfo.DirectoryName);
+
             File.Copy("cert.json", certRequestFile);
 
             acmeContext = new AcmeContext(staging ? WellKnownServers.LetsEncryptStagingV2 : WellKnownServers.LetsEncryptV2);
@@ -118,15 +126,6 @@ namespace UwebServerCert
                 accountFile = Path.Combine(encryptDirectory, $"access{(staging ? "-staging" : "")}.pem");            
                 certRequestFile = Path.Combine(encryptDirectory, $"cert{(staging ? "-staging" : "")}.json");            
 
-                var certificate = new X509Certificate2(certificateFile, "uriegel");
-
-                Console.WriteLine($"Certificate expires: {certificate.NotAfter}");
-                if (certificate.NotAfter > DateTime.Now + TimeSpan.FromDays(30))
-                {
-                    Console.WriteLine("No further action needed");
-                    return;
-                }
-
                 CertRequest certRequest = null;
                 if (deleteAccount)
                 {
@@ -135,8 +134,21 @@ namespace UwebServerCert
                 }
                 else if (createAccount)
                     certRequest = await CreateAccountAsync(staging);
-                else    
+                else  
+                {
+                    if (File.Exists(certificateFile))
+                    {
+                        var certificate = new X509Certificate2(certificateFile, "uriegel");
+
+                        Console.WriteLine($"Certificate expires: {certificate.NotAfter}");
+                        if (certificate.NotAfter > DateTime.Now + TimeSpan.FromDays(30))
+                        {
+                            Console.WriteLine("No further action needed");
+                            return;
+                        }                    
+                    }
                     certRequest = await ReadAccountAsync(staging);
+                }
 
                 Console.WriteLine($"Registering domains: {String.Join(", ", certRequest.Domains)}"); 
 

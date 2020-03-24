@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <PublishTrimmed>true</PublishTrimmed>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>uwebcert</ToolCommandName>
@@ -9,6 +10,8 @@
     <Version>1.0.0</Version>
 		<FileVersion>1.0.0.0</FileVersion>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <PublishSingleFile>true</PublishSingleFile>
+    <RuntimeIdentifier>linux-arm</RuntimeIdentifier>    
 		<Authors>Uwe Riegel</Authors>
     <Company>Uwe Riegel</Company>		
 		<Description>Lets Encrypt Certificate creator and updater</Description>
