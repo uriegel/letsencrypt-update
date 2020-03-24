@@ -173,9 +173,10 @@ namespace UwebServerCert
                 var certPem = cert.ToPem();
                 var pfxBuilder = cert.ToPfx(privateKey);
 
-                var passwordFile = Path.Combine(encryptDirectory, $"passwd{(staging ? "-staging" : "")}");
-                var passwd = Guid.NewGuid().ToString();
-                File.WriteAllText(passwordFile, passwd);
+                //var passwordFile = Path.Combine(encryptDirectory, $"passwd{(staging ? "-staging" : "")}");
+                //var passwd = Guid.NewGuid().ToString();
+                // File.WriteAllText(passwordFile, passwd);
+                var passwd = "uriegel";
                 var pfx = pfxBuilder.Build(certRequest.Data.CommonName, passwd);
                 Console.WriteLine($"Saving certificate"); 
                 File.WriteAllBytes(certificateFile, pfx);
