@@ -45,7 +45,7 @@ namespace UwebServerCert
             acmeContext = new AcmeContext(staging ? WellKnownServers.LetsEncryptStagingV2 : WellKnownServers.LetsEncryptV2, accountKey);
             account = await acmeContext.Account();                 
             Console.WriteLine("Letsencrypt account read");
-            return ReadRequest("cert.json");
+            return ReadRequest(certRequestFile);
         }
 
         static void DeleteAccount()

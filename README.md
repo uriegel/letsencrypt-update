@@ -21,3 +21,5 @@ sudo ~/.dotnet/tools/uwebcert -create -prod
 ## Errors:
 At the moment you have to call ```sudo ~/.dotnet/tools/uwebcert -create -prod``` from the directory ```/etc/letsencrypt-uweb```
 
+Webserver has to be restarted in order to take renewed certificate
+
