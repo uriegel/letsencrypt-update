@@ -1,15 +1,12 @@
-namespace UwebServerCert
+class CertRequest
 {
-    class CertRequest
+    public CertRequest(string account, string[] domains, CertificateData data)
     {
-        public CertRequest(string account, string[] domains, CertificateData data)
-        {
-            Account = account;
-            Domains = domains;
-            Data = data;
-        }
-        public string Account { get; }
-        public string[] Domains { get; }
-        public CertificateData Data { get;}
+        Account = account;
+        Domains = domains;
+        Data = data;
     }
+    public string Account { get; }
+    public string[] Domains { get; }
+    public CertificateData Data { get;}
 }
