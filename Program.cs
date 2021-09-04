@@ -12,14 +12,11 @@ using Newtonsoft.Json.Serialization;
 // Parameter: -del: delete account
 // Parameter: -create: read file cert.json
 
-// TO build: 
+// To build: 
 // dotnet publish -c Release
 
-#if DEBUG
-const string encryptDirectory = "letsencrypt-uweb";
-#else
-const string encryptDirectory = "/etc/letsencrypt-uweb";
-#endif
+string encryptDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "letsencrypt-uweb");
+//const string encryptDirectory = "/etc/letsencrypt-uweb";
 
 string certRequestFile;
 AcmeContext acmeContext = null;
@@ -30,7 +27,7 @@ try
 {
     Console.WriteLine($"Starting letsencrypt certificate handling");
     
-    bool staging = !args.Contains("-prod");
+    bool staging = false; //!args.Contains("-prod");
     bool deleteAccount = args.Contains("-del");
     bool createAccount = args.Contains("-create");
     Console.WriteLine(staging ? "Staging" : "!!! P R O D U C T I V E !!!");
@@ -114,8 +111,7 @@ async Task<CertRequest> CreateAccountAsync(bool staging)
     if (!fileInfo.Directory.Exists)
         Directory.CreateDirectory(fileInfo.DirectoryName);
 
-    File.Copy("cert.json", certRequestFile);
-
+    File.Copy("cert.json", certRequestFile, true);
     acmeContext = new AcmeContext(staging ? WellKnownServers.LetsEncryptStagingV2 : WellKnownServers.LetsEncryptV2);
     account = await acmeContext.NewAccount(certRequest.Account, true);
     var pemKey = acmeContext.AccountKey.ToPem();

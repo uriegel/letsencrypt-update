@@ -23,3 +23,8 @@ At the moment you have to call ```sudo ~/.dotnet/tools/uwebcert -create -prod```
 
 Webserver has to be restarted in order to take renewed certificate
 
+## cron job running every day:
+
+```
+sudo ~/.dotnet/tools/uwebcert -prod
+``` 
