@@ -3,10 +3,9 @@
   <PropertyGroup>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>uwebcert</ToolCommandName>
-    <PackageOutputPath>./nupkg</PackageOutputPath>    
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
 		<FileVersion>2.0.1.0</FileVersion>
 		<AssemblyVersion>2.0.1.0</AssemblyVersion>
     <Authors>Uwe Riegel</Authors>
@@ -16,7 +15,8 @@
 		<PackageProjectUrl>https://github.com/uriegel/UwebServerCert</PackageProjectUrl>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageTags>CSharp dotnet tool tls certificate</PackageTags>        
+		<PackageTags>CSharp;dotnet;tool;tls;certificate</PackageTags>   
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>    
   </PropertyGroup>
 
   <ItemGroup>
