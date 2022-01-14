@@ -1,12 +1,11 @@
 # UwebServerCert
 LetsEncrypt bot to automatically create an LetsEncrypt certificate for UwebServer
 
+## Prerequisites
+
 ``` 
 sudo dnf install openssl-devel
 ```
-
-## Prerequisites
-openssl-devel
 
 ## Executing the tool for the first time
 
