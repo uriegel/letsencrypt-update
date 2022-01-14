@@ -18,11 +18,18 @@ fn main() {
     // creates a new one before accessing the API to establish
     // that it's there.
     //let acc = dir.account("uriegel@hotmail.de")?;
+
+
     let acc = dir.account("uriegel@hotmail.de").unwrap();
+    if let Some(cert) = acc.certificate("familie.uriegel.de").ok().flatten() {
+        println!("valid days left: {}", cert.valid_days_left());
+        if cert.valid_days_left() > 30 { return }
+    }
 
     // Order a new TLS certificate for a domain.
-    //let mut ord_new = acc.new_order("uriegel.de", &[ "fritz.uriegel.de", "familie.uriegel.de" ])?;
-    let mut ord_new = acc.new_order("uriegel.de", &[ "uriegel.de" ]).unwrap();
+    //let mut ord_new = acc.new_order("uriegel.de", &[  ])?;
+    let mut ord_new = acc.new_order("uriegel.de", 
+    &[ "uriegel.de", "familie.uriegel.de", "fritz.uriegel.de" ]).unwrap();
 
     // If the ownership of the domain(s) have already been
     // authorized in a previous order, you might be able to
@@ -37,40 +44,39 @@ fn main() {
         // this will only be one element).
         //let auths = ord_new.authorizations()?;
         let auths = ord_new.authorizations().unwrap();
+        auths.iter().for_each(|auth| {
+            // For HTTP, the challenge is a text file that needs to
+            // be placed in your web server's root:
+            //
+            // /var/www/.well-known/acme-challenge/<token>
+            //
+            // The important thing is that it's accessible over the
+            // web for the domain(s) you are trying to get a
+            // certificate for:
+            //
+            // http://mydomain.io/.well-known/acme-challenge/<token>
+            let chall = auth.http_challenge();   
+            
+            // The token is the filename.
+            let token = chall.http_token();
+            //let path = format!(".well-known/acme-challenge/{}", token);
+            let path = format!("/home/uwe/acme-challenge/{}", token);
 
-        // For HTTP, the challenge is a text file that needs to
-        // be placed in your web server's root:
-        //
-        // /var/www/.well-known/acme-challenge/<token>
-        //
-        // The important thing is that it's accessible over the
-        // web for the domain(s) you are trying to get a
-        // certificate for:
-        //
-        // http://mydomain.io/.well-known/acme-challenge/<token>
-        let chall = auths[0].http_challenge();   
-        
-        // The token is the filename.
-        let token = chall.http_token();
-        //let path = format!(".well-known/acme-challenge/{}", token);
-        let path = format!("/home/uwe/acme-challenge/{}", token);
+            // The proof is the contents of the file
+            let proof = chall.http_proof();
 
-        // The proof is the contents of the file
-        let proof = chall.http_proof();
-
-        // Here you must do "something" to place
-        // the file/contents in the correct place.
-        // update_my_web_server(&path, &proof);
-        // TODO: save token in right place
-        fs::write(path, &proof).expect("Unable to write file");        
-
-        // The order at ACME will change status to either
-        // confirm ownership of the domain, or fail due to the
-        // not finding the proof. To see the change, we poll
-        // the API with 5000 milliseconds wait between.
-        //chall.validate(5000)?;
-        chall.validate(5000).unwrap();
-
+            // Here you must do "something" to place
+            // the file/contents in the correct place.
+            // update_my_web_server(&path, &proof);
+            // TODO: save token in right place
+            fs::write(path, &proof).expect("Unable to write file");        
+            // The order at ACME will change status to either
+            // confirm ownership of the domain, or fail due to the
+            // not finding the proof. To see the change, we poll
+            // the API with 5000 milliseconds wait between.
+            //chall.validate(5000)?;
+            chall.validate(5000).unwrap();
+        });
         // Update the state against the ACME API.
         //ord_new.refresh()?;
         ord_new.refresh().unwrap();
