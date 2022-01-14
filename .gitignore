@@ -6,3 +6,4 @@ nupkg/
 # Added by cargo
 
 /target
+cert

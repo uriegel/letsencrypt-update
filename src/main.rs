@@ -22,7 +22,7 @@ fn main() {
 
     // Order a new TLS certificate for a domain.
     //let mut ord_new = acc.new_order("uriegel.de", &[ "fritz.uriegel.de", "familie.uriegel.de" ])?;
-    let mut ord_new = acc.new_order("uriegel.de", &[ "fritz.uriegel.de", "familie.uriegel.de" ]).unwrap();
+    let mut ord_new = acc.new_order("uriegel.de", &[ "uriegel.de" ]).unwrap();
 
     // If the ownership of the domain(s) have already been
     // authorized in a previous order, you might be able to
