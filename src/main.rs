@@ -1,4 +1,4 @@
-use std::fs;
+use std::fs::{self, remove_dir_all, create_dir};
 
 use acme_lib::{DirectoryUrl, persist::FilePersist, Directory, create_p384_key};
 use serde::Deserialize;
@@ -14,12 +14,11 @@ pub struct Settings {
 fn main() {
     println!("Starting letsencrypt-update...");    
 
-    let settings = 
-        fs::read_to_string(dirs::config_dir()
-                .expect("Could not find config dir")
-                .join("letsencrypt-update")
-                .join("letsencrypt-update.conf")
-            ).expect("Could not read settings");
+    let cert_dir = dirs::config_dir().expect("Could not find config dir")
+        .join("letsencrypt-update");
+
+    let settings = fs::read_to_string(cert_dir.join("letsencrypt-update.conf"))
+        .expect("Could not read settings");
     let settings: Settings = serde_json::from_str(&settings).expect("Could not extract settings");
     println!("Settings: {settings:#?}");
 
@@ -30,29 +29,7 @@ fn main() {
     };
     
     // Save/load keys and certificates to current dir.
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    // TODO . in config/letsencrypt-update    
-    let persist = FilePersist::new("./cert");
+    let persist = FilePersist::new(&cert_dir);
 
     // Create a directory entrypoint.
     let dir = Directory::from_url(persist, url).expect("Could not create directory entrypoint");    
@@ -108,18 +85,13 @@ fn main() {
             // The token is the filename.
             let token = chall.http_token();
 
-
-
-
-
-
-            // TODO delete folder 
-            // TODO create folder in settings.certDir
-            let path = format!("/home/uwe/acme-challenge/{token}");
+            let acme_challenge = &cert_dir.join("acme-challenge");
+            let _ = remove_dir_all(&acme_challenge);
+            create_dir(&acme_challenge).expect("Could ot create acme-challenge dir");
 
             // The proof is the contents of the file
             let proof = chall.http_proof();
-            fs::write(path, &proof).expect("Unable to write file");        
+            fs::write(acme_challenge.join(token), &proof).expect("Unable to write file");        
             // The order at ACME will change status to either
             // confirm ownership of the domain, or fail due to the
             // not finding the proof. To see the change, we poll
