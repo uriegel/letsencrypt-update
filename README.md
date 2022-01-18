@@ -1,5 +1,5 @@
-# UwebServerCert
-LetsEncrypt bot to automatically create an LetsEncrypt certificate for UwebServer
+# letsencrypt-update
+LetsEncrypt bot to automatically create an LetsEncrypt certificate for web server (especially uriegel/HomeServer)
 
 ## Prerequisites
 
