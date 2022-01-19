@@ -7,34 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'UwebServerCert'",
+            "name": "Debug executable 'letsencrypt-cert'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=UwebServerCert",
-                    "--package=UwebServerCert"
+                    "--bin=letsencrypt-cert",
+                    "--package=letsencrypt-cert"
                 ],
                 "filter": {
-                    "name": "UwebServerCert",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'UwebServerCert'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=UwebServerCert",
-                    "--package=UwebServerCert"
-                ],
-                "filter": {
-                    "name": "UwebServerCert",
+                    "name": "letsencrypt-cert",
                     "kind": "bin"
                 }
             },
