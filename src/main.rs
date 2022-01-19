@@ -1,4 +1,4 @@
-use std::{fs::{self, remove_dir_all, create_dir}, path::PathBuf};
+use std::{fs::{self, remove_dir_all, create_dir, File}, path::PathBuf, io::Write};
 
 use acme_lib::{DirectoryUrl, persist::FilePersist, Directory, create_p384_key};
 use serde::Deserialize;
@@ -118,13 +118,14 @@ fn main() {
     // the persistence.
     let cert = ord_cert.download_and_save_cert().expect("Could not download certificate");
     let cert_str = cert.certificate();
-    write_cert(&cert_dir, cert_str);
+    write_cert(&cert_dir.join("cert.pem"), cert_str);
     let key_str = cert.private_key();
-    write_cert(&cert_dir, key_str);
+    write_cert(&cert_dir.join("key.pem"), key_str);
 
     println!("letsencrypt-cert finished")
 }
 
 fn write_cert(cert_dir: &PathBuf, cert: &str) {
-
+    let mut file = File::create(cert_dir).expect("Unable to create cert file");
+    file.write_all(cert.as_bytes()).expect("Unable to write data");
 }
