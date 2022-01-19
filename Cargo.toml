@@ -10,3 +10,7 @@ acme-lib = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dirs = "4.0"
+
+# Pi 2/3/4 Added due to reqwest dependency problems when cross-compiling for RPi
+[target.armv7-unknown-linux-gnueabihf.dependencies]
+openssl = { version = "0.10", features = ["vendored"] }
