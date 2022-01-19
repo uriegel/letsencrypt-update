@@ -1,4 +1,4 @@
-use std::fs::{self, remove_dir_all, create_dir};
+use std::{fs::{self, remove_dir_all, create_dir}, path::PathBuf};
 
 use acme_lib::{DirectoryUrl, persist::FilePersist, Directory, create_p384_key};
 use serde::Deserialize;
@@ -117,11 +117,14 @@ fn main() {
     // Now download the certificate. Also stores the cert in
     // the persistence.
     let cert = ord_cert.download_and_save_cert().expect("Could not download certificate");
-    
-    
-    // TODO copy pems to settings cert_dir
-    
-    
-    
-    println!("Zertifikate: {:?}", cert);
+    let cert_str = cert.certificate();
+    write_cert(&cert_dir, cert_str);
+    let key_str = cert.private_key();
+    write_cert(&cert_dir, key_str);
+
+    println!("Finished")
+}
+
+fn write_cert(cert_dir: &PathBuf, cert: &str) {
+
 }
