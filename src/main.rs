@@ -12,12 +12,12 @@ pub struct Settings {
 }
 
 fn main() {
-    println!("Starting letsencrypt-update...");    
+    println!("Starting letsencrypt-cert...");    
 
     let cert_dir = dirs::config_dir().expect("Could not find config dir")
-        .join("letsencrypt-update");
+        .join("letsencrypt-cert");
 
-    let settings = fs::read_to_string(cert_dir.join("letsencrypt-update.conf"))
+    let settings = fs::read_to_string(cert_dir.join("letsencrypt-cert.conf"))
         .expect("Could not read settings");
     let settings: Settings = serde_json::from_str(&settings).expect("Could not extract settings");
     println!("Settings: {settings:#?}");
@@ -122,7 +122,7 @@ fn main() {
     let key_str = cert.private_key();
     write_cert(&cert_dir, key_str);
 
-    println!("Finished")
+    println!("letsencrypt-cert finished")
 }
 
 fn write_cert(cert_dir: &PathBuf, cert: &str) {
