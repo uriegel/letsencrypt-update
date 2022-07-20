@@ -118,7 +118,6 @@ async Task<CertRequest> CreateAccountAsync(bool staging)
     var fi = new FileInfo(accountFile);
     Directory.CreateDirectory(fi.DirectoryName);
     await File.WriteAllTextAsync(accountFile, pemKey);     
-    // TODO http://uriegel.de/.well-known/acme-challenge/<token>
     Console.WriteLine("Letsencrypt account created");
     return certRequest;
 }
