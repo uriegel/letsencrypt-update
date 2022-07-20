@@ -27,7 +27,7 @@ try
 {
     Console.WriteLine($"Starting letsencrypt certificate handling");
     
-    bool staging = false; //!args.Contains("-prod");
+    bool staging = !args.Contains("-prod");
     bool deleteAccount = args.Contains("-del");
     bool createAccount = args.Contains("-create");
     Console.WriteLine(staging ? "Staging" : "!!! P R O D U C T I V E !!!");
@@ -117,7 +117,8 @@ async Task<CertRequest> CreateAccountAsync(bool staging)
     var pemKey = acmeContext.AccountKey.ToPem();
     var fi = new FileInfo(accountFile);
     Directory.CreateDirectory(fi.DirectoryName);
-    await File.WriteAllTextAsync(accountFile, pemKey);            
+    await File.WriteAllTextAsync(accountFile, pemKey);     
+    // TODO http://uriegel.de/.well-known/acme-challenge/<token>
     Console.WriteLine("Letsencrypt account created");
     return certRequest;
 }
