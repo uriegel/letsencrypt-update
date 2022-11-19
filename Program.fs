@@ -1,10 +1,15 @@
 ﻿open Parameters
 
+let perform () = async {
+    let! account = Account.get ()
+    return ()
+}
+
 printfn "Starting letsencrypt certificate handling"
 match Parameters.get () with
 | { Value.Mode = Create } -> Account.create () |> Async.RunSynchronously
 | { Value.Mode = Delete } -> Account.delete ()
-| _                       -> ()
+| _                       -> perform () |> Async.RunSynchronously
 printfn "Letsencrypt certificate handling finished"
 
 // using System.Security.Cryptography.X509Certificates;
@@ -85,16 +90,6 @@ printfn "Letsencrypt certificate handling finished"
 
 
 
-// async Task<CertRequest> ReadAccountAsync(bool staging)
-// {
-//     Console.WriteLine("Reading letsencrypt account");
-//     var pemKey = await File.ReadAllTextAsync(accountFile);
-//     var accountKey = KeyFactory.FromPem(pemKey);
-//     acmeContext = new AcmeContext(staging ? WellKnownServers.LetsEncryptStagingV2 : WellKnownServers.LetsEncryptV2, accountKey);
-//     account = await acmeContext.Account();                 
-//     Console.WriteLine("Letsencrypt account read");
-//     return ReadRequest(certRequestFile);
-// }
 
 // async Task ValidateAsync(IAuthorizationContext authorization)
 // {
