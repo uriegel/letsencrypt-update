@@ -10,7 +10,11 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/bin/Debug/net6.0/LetsencryptCert.dll",
-            "args": ["-create"],
+            "args": [
+                "-create", 
+                //"-del", 
+                //"-prod"
+            ],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"

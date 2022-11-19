@@ -8,6 +8,7 @@ open Parameters
 open Letsencryptcert
 open Certes
 open Certes.Acme
+open FSharpTools.Directory
 
 
 let private options = JsonSerializerOptions (PropertyNameCaseInsensitive = true)
@@ -45,14 +46,9 @@ let create () = async {
 
 let delete () =
     printfn "Deleting letsencrypt account"
-    // TODO deleteFile => Result => ignore FSharpTools
-    File.Delete (getCertFile ())
-//     }
-//     catch {}
-//     try 
-//     {
-    File.Delete (getAccountFile ())
-//     }
-//     catch {}
+    if existsFile <| getCertFile () then 
+        File.Delete (getCertFile ())
+    if existsFile <| getAccountFile () then 
+        File.Delete (getAccountFile ())
     printfn "Letsencrypt account deleted"
 

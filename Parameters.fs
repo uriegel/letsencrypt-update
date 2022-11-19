@@ -52,11 +52,6 @@ let getCertFile =
 let getAccountFile = 
     let getAccountFile () =
         getEncryptDirectory ()
-        |> Directory.combine2Pathes 
-        <| (if (get ()).Staging 
-                then "-staging" 
-            else 
-                "" 
-            |> sprintf "account%s.pem")
+        |> Directory.attachSubPath "accounts.pem"
 
     memoizeSingle getAccountFile
