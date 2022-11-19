@@ -19,7 +19,7 @@ printfn "Letsencrypt certificate handling finished"
 // IAccountContext account;
 // string accountFile;
 
-//     Console.WriteLine(staging ? "Staging" : "!!! P R O D U C T I V E !!!");
+//     
 
 //     var certificateFile = Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx");
 

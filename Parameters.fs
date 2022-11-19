@@ -26,9 +26,18 @@ type Value = {
 /// ```Value``` object
 let get = 
     let get () = 
+        
+        let printProductive b =
+            if b then "!!! P R O D U C T I V E !!!" else "Staging" 
+            |> printfn "%s"
+
         let args = Environment.GetCommandLineArgs ()
         {
-            Staging = args |> Array.contains "-prod" |> not
+            Staging = 
+                args 
+                |> Array.contains "-prod" 
+                |> sideEffect printProductive 
+                |> not
             Mode = 
                 match args |> Array.contains "-create", args |> Array.contains "-del" with
                 | true, false -> Create
