@@ -5,26 +5,34 @@
     <ToolCommandName>uwebcert</ToolCommandName>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <Version>2.0.1</Version>
-		<FileVersion>2.0.1.0</FileVersion>
-		<AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <Version>3.0.0</Version>
+		<FileVersion>3.0.0.0</FileVersion>
+		<AssemblyVersion>3.0.0.0</AssemblyVersion>
     <Authors>Uwe Riegel</Authors>
     <Company>Uwe Riegel</Company>		
 		<Description>Lets Encrypt Certificate creator and updater</Description>
 		<PackageLicenseUrl></PackageLicenseUrl>
-		<PackageProjectUrl>https://github.com/uriegel/UwebServerCert</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/uriegel/letsencrypt-cert</PackageProjectUrl>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageTags>CSharp;dotnet;tool;tls;certificate</PackageTags>   
+		<PackageTags>F#;FSharp;dotnet;tool;tls;certificate</PackageTags>   
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>    
+    <PackageReleaseNotes>
+Converted to F#    
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
    	<None Include="LICENSE" pack="true" PackagePath ="." />
+    <None Include="README.md" pack="true" PackagePath="." />
  	</ItemGroup>  
+
   <ItemGroup>
     <PackageReference Include="Certes" Version="3.0.0" />
-    <PackageReference Include="NewtonSoft.Json" Version="13.0.1" />
   </ItemGroup>
 
 </Project>
