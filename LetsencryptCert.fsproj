@@ -1,38 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>uwebcert</ToolCommandName>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <Version>3.0.0</Version>
-		<FileVersion>3.0.0.0</FileVersion>
-		<AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
     <Authors>Uwe Riegel</Authors>
-    <Company>Uwe Riegel</Company>		
-		<Description>Lets Encrypt Certificate creator and updater</Description>
-		<PackageLicenseUrl></PackageLicenseUrl>
-		<PackageProjectUrl>https://github.com/uriegel/letsencrypt-cert</PackageProjectUrl>
-		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageTags>F#;FSharp;dotnet;tool;tls;certificate</PackageTags>   
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>    
+    <Company>Uwe Riegel</Company>
+    <Description>Lets Encrypt Certificate creator and updater</Description>
+    <PackageLicenseUrl>
+    </PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/uriegel/letsencrypt-cert</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageTags>F#;FSharp;dotnet;tool;tls;certificate</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReleaseNotes>
 Converted to F#    
     </PackageReleaseNotes>
   </PropertyGroup>
-
   <ItemGroup>
+    <Compile Include="CertRequest.fs" />
+    <Compile Include="Parameters.fs" />
+    <Compile Include="Account.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup>
-   	<None Include="LICENSE" pack="true" PackagePath ="." />
+    <None Include="LICENSE" pack="true" PackagePath="." />
     <None Include="README.md" pack="true" PackagePath="." />
- 	</ItemGroup>  
-
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Certes" Version="3.0.0" />
+    <PackageReference Include="FSharpTools" Version="9.2.1" />
   </ItemGroup>
-
 </Project>

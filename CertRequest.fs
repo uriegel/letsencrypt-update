@@ -1,12 +1,16 @@
-// class CertRequest
-// {
-//     public CertRequest(string account, string[] domains, CertificateData data)
-//     {
-//         Account = account;
-//         Domains = domains;
-//         Data = data;
-//     }
-//     public string Account { get; }
-//     public string[] Domains { get; }
-//     public CertificateData Data { get;}
-// }
+namespace Letsencryptcert
+
+type CertificateData = {
+    CountryName: string
+    State: string
+    Locality: string
+    Organization: string
+    OrganizationUnit: string
+    CommonName: string
+}
+
+type CertRequest = {
+    Account: string
+    Domains: string array
+    Data: CertificateData
+}
