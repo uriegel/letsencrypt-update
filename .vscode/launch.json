@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/bin/Debug/net6.0/LetsencryptCert.dll",
             "args": [
-                "//-create", 
+                //"-create", 
                 //"-prod"
             ],
             "cwd": "${workspaceFolder}",

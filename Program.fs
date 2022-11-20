@@ -1,7 +1,11 @@
 ﻿open FSharpTools
 
 open Parameters
+open Certes.Acme.Resource
 
+
+
+open Authorization
 let perform () = async {
     let! acme = Account.get ()
 
@@ -13,9 +17,10 @@ let perform () = async {
     |> String.joinStr ", "
     |> printfn "Registering domains: %s"  
 
-    let! order = acme.NewOrder (getCertData ()).Domains |> Async.AwaitTask
-
-    return ()
+    return! 
+        acme.NewOrder (getCertData ()).Domains 
+        |> Async.AwaitTask
+        >>= Authorization.validateAll
 }
 
 printfn "Starting letsencrypt certificate handling"
