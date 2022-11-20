@@ -1,11 +1,22 @@
 ﻿open FSharpTools
 
 open Parameters
-open Certes.Acme.Resource
+open Certes.Acme
+open Org.BouncyCastle.Crypto.Tls
 
 
+let retrieveCert (order: IOrderContext) result = async { 
+    return! 
+        match result with
+        | Ok _ -> Certificate.order order
+        | Error err -> result |> Async.toAsync
+}
 
 open Authorization
+let performOrder (order: IOrderContext) = 
+    Authorization.validateAll order
+    |> asyncBind (retrieveCert order)
+
 let perform () = async {
     let! acme = Account.get ()
 
@@ -20,13 +31,24 @@ let perform () = async {
     return! 
         acme.NewOrder (getCertData ()).Domains 
         |> Async.AwaitTask
-        >>= Authorization.validateAll
+        >>= performOrder
+}
+
+let printError result = async {
+    match! result with
+    | Ok _ -> return ()
+    | Error err -> err |> printfn ("An error has occurred: %s")
 }
 
 printfn "Starting letsencrypt certificate handling"
 match Parameters.get () with
 | { Value.Mode = Create } -> Account.create () |> Async.RunSynchronously
-| _                       -> perform () |> Async.RunSynchronously
+| _                       -> 
+    perform () 
+    |> printError
+    |> Async.RunSynchronously
+
+// TODO delete all token files
 printfn "Letsencrypt certificate handling finished"
 
 // using System.Security.Cryptography.X509Certificates;
