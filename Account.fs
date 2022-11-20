@@ -46,18 +46,6 @@ let create () = async {
     printfn "Letsencrypt account created"
 }
 
-// TODO to FSharpTools
-let asyncMap f x = async {
-    let! v = x
-    return f v
-}
-// TODO to FSharpTools
-let asyncSideEffect f x = async {
-    let! a = x
-    do! f a
-    return a
-}
-
 let get () = 
     printfn "Reading letsencrypt account"
 
@@ -78,7 +66,7 @@ let get () =
         result
 
     readPem ()
-    |> asyncMap keyFromPem
-    |> asyncMap getAccount
-    |> asyncSideEffect openAccount
+    |> Async.map keyFromPem
+    |> Async.map getAccount
+    |> Async.sideEffect openAccount
 

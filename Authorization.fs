@@ -11,17 +11,7 @@ open System
 open System.IO
 
 open Parameters
-open Account
-open FSharpTools.Option
-open FSharpTools.Async
-
-// TODO to FSharpTools
-let asyncBind f x = async {
-    let! v = x
-    return!f v
-}
-let inline (>>=) x binder = asyncBind binder x
-let inline (>=>) f1 f2 x = f1 x >>= f2
+open Async    
 
 let validateAll: IOrderContext->Async<Result<unit, string>> =
 
@@ -47,21 +37,21 @@ let validateAll: IOrderContext->Async<Result<unit, string>> =
         let validateChallenge (challenge: IChallengeContext) = 
             challenge.Validate () 
             |> Async.AwaitTask
-            |> asyncSideEffect printChallengeResult
+            |> Async.sideEffect printChallengeResult
             |> matchChallengeResult
 
         let writeKeyTokenFile (challenge: IChallengeContext) = 
             File.WriteAllTextAsync (Directory.combinePathes [| 
                     getEncryptDirectory () 
-                    challenge.Token |> sideEffect (printfn "Validating LetsEncrypt token: %s")
+                    challenge.Token |> Functional.sideEffect (printfn "Validating LetsEncrypt token: %s")
                 |], challenge.KeyAuthz)
             |> Async.AwaitTask
 
         let validate (challenge: Async<IChallengeContext>) = 
             let validate () = 
                 challenge 
-                |> asyncSideEffect writeKeyTokenFile 
-                |> asyncBind validateChallenge
+                |> Async.sideEffect writeKeyTokenFile 
+                |> Async.bind validateChallenge
             validate
             |> repeatOnError (TimeSpan.FromSeconds 3) 7            
 
@@ -74,7 +64,7 @@ let validateAll: IOrderContext->Async<Result<unit, string>> =
 
     let getAuthorizations (order: IOrderContext) = 
         order.Authorizations () |> Async.AwaitTask
-    
+
     let iterAuthorizations (authorizations: IAuthorizationContext seq) = async {
         return! authorizations
             |> AsyncSeq.ofSeq

@@ -1,9 +1,7 @@
-﻿open FSharpTools
-
+﻿open Certes.Acme
+open FSharpTools
 open Parameters
-open Certes.Acme
-open Org.BouncyCastle.Crypto.Tls
-
+open Async
 
 let retrieveCert (order: IOrderContext) result = async { 
     return! 
@@ -15,7 +13,7 @@ let retrieveCert (order: IOrderContext) result = async {
 open Authorization
 let performOrder (order: IOrderContext) = 
     Authorization.validateAll order
-    |> asyncBind (retrieveCert order)
+    >>= retrieveCert order
 
 let perform () = async {
     let! acme = Account.get ()
