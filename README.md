@@ -1,7 +1,5 @@
 # UwebServerCert
-LetsEncrypt bot to automatically create an LetsEncrypt certificate for UwebServer
-
-'``
+LetsEncrypt bot to automatically create an LetsEncrypt certificate for a Web Server
 
 ## Installation
 ```
@@ -49,6 +47,7 @@ Your webserver has to serve the token to LetsEncrypt.
 To get a secure certificate, you have to set the command line argument ```-prod```:
 
 ```
+LetsencryptCert -create -prod
 LetsencryptCert -prod
 ```
 

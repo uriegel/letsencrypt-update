@@ -8,10 +8,6 @@ open Parameters
 open Letsencryptcert
 open Certes
 open Certes.Acme
-open FSharpTools.Directory
-open System.Runtime.CompilerServices
-open Certes.Acme.Resource
-
 
 let private options = JsonSerializerOptions (PropertyNameCaseInsensitive = true)
 
@@ -52,7 +48,7 @@ let asyncMap f x = async {
     let! v = x
     return f v
 }
-
+// TODO to FSharpTools
 let asyncSideEffect f x = async {
     let! a = x
     do! f a
@@ -74,7 +70,7 @@ let get () =
             |> Async.Ignore
 
     let getAccount (accountKey: IKey) = 
-        let result = AcmeContext ((if (get()).Staging then WellKnownServers.LetsEncryptStagingV2 else WellKnownServers.LetsEncryptV2), accountKey)
+        let result = AcmeContext (Parameters.getAcmeUri (), accountKey)
         printfn "Letsencrypt account read"
         result
 
@@ -82,12 +78,4 @@ let get () =
     |> asyncMap keyFromPem
     |> asyncMap getAccount
     |> asyncSideEffect openAccount
-
-let delete () =
-    printfn "Deleting letsencrypt account"
-    if existsFile <| getCertFile () then 
-        File.Delete (getCertFile ())
-    if existsFile <| getAccountFile () then 
-        File.Delete (getAccountFile ())
-    printfn "Letsencrypt account deleted"
 

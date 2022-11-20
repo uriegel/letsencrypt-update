@@ -6,7 +6,7 @@
         {
             "label": "build",
             "command": "dotnet",
-            "type": "shell",
+            "type": "shell",    
             "args": [
                 "build",
                 // Ask dotnet build to generate full paths for file names.

@@ -8,23 +8,12 @@ let perform () = async {
 printfn "Starting letsencrypt certificate handling"
 match Parameters.get () with
 | { Value.Mode = Create } -> Account.create () |> Async.RunSynchronously
-| { Value.Mode = Delete } -> Account.delete ()
 | _                       -> perform () |> Async.RunSynchronously
 printfn "Letsencrypt certificate handling finished"
 
 // using System.Security.Cryptography.X509Certificates;
 // using Certes;
 // using Certes.Acme;
-
-
-
-
-// string certRequestFile;
-// AcmeContext acmeContext = null;
-// IAccountContext account;
-// string accountFile;
-
-//     
 
 //     var certificateFile = Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx");
 
@@ -78,7 +67,7 @@ printfn "Letsencrypt certificate handling finished"
 //     //var passwordFile = Path.Combine(encryptDirectory, $"passwd{(staging ? "-staging" : "")}");
 //     //var passwd = Guid.NewGuid().ToString();
 //     // File.WriteAllText(passwordFile, passwd);
-//     TODO passwd in cert.json var passwd = "uriegel";
+//     TODO passwd in /etc/letsencrypt-uweb var passwd = "uriegel";
 //     var pfx = pfxBuilder.Build(certRequest.Data.CommonName, passwd);
 //     Console.WriteLine($"Saving certificate"); 
 //     File.WriteAllBytes(certificateFile, pfx);

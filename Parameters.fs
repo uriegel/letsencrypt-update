@@ -3,6 +3,7 @@ module Parameters
 open System
 open FSharpTools
 open FSharpTools.Functional
+open Certes.Acme
 
 type Mode =
 | Create
@@ -59,8 +60,16 @@ let getCertFile =
     memoizeSingle getCertFile
     
 let getAccountFile = 
+    let getName () = if (get()).Staging then "accounts-staging.pem" else "accounts.pem"
     let getAccountFile () =
         getEncryptDirectory ()
-        |> Directory.attachSubPath "accounts.pem"
+        |> Directory.attachSubPath (getName ())
 
     memoizeSingle getAccountFile
+
+let getAcmeUri = 
+    let getAcmeUri () = 
+        if (get()).Staging 
+            then WellKnownServers.LetsEncryptStagingV2 
+        else WellKnownServers.LetsEncryptV2    
+    memoizeSingle getAcmeUri
