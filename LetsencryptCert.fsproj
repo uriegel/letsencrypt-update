@@ -26,6 +26,7 @@ Converted to F#
     <Compile Include="CertRequest.fs" />
     <Compile Include="Parameters.fs" />
     <Compile Include="Account.fs" />
+    <Compile Include="Authorization.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

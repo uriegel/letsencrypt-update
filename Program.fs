@@ -1,7 +1,20 @@
-﻿open Parameters
+﻿open FSharpTools
+
+open Parameters
 
 let perform () = async {
-    let! account = Account.get ()
+    let! acme = Account.get ()
+
+    let getCertData () = 
+        getCertFile ()
+        |> Account.readRequest 
+
+    (getCertData ()).Domains 
+    |> String.joinStr ", "
+    |> printfn "Registering domains: %s"  
+
+    let! order = acme.NewOrder (getCertData ()).Domains |> Async.AwaitTask
+
     return ()
 }
 
@@ -16,15 +29,7 @@ printfn "Letsencrypt certificate handling finished"
 // using Certes.Acme;
 
 //     var certificateFile = Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx");
-
 //     CertRequest certRequest = null;
-//     if (deleteAccount)
-//     {
-//         DeleteAccount();
-//         return;
-//     }
-//     else if (createAccount)
-//         certRequest = await CreateAccountAsync(staging);
 //     else  
 //     {
 //         if (File.Exists(certificateFile))
@@ -41,9 +46,9 @@ printfn "Letsencrypt certificate handling finished"
 //         certRequest = await ReadAccountAsync(staging);
 //     }
 
-//     Console.WriteLine($"Registering domains: {String.Join(", ", certRequest.Domains)}"); 
 
-//     var order = await acmeContext.NewOrder(certRequest.Domains);
+
+
 //     var authorizations = (await order.Authorizations()).ToArray();
 //     foreach (var authorization in authorizations)
 //         await ValidateAsync(authorization);
@@ -67,16 +72,10 @@ printfn "Letsencrypt certificate handling finished"
 //     //var passwordFile = Path.Combine(encryptDirectory, $"passwd{(staging ? "-staging" : "")}");
 //     //var passwd = Guid.NewGuid().ToString();
 //     // File.WriteAllText(passwordFile, passwd);
-//     TODO passwd in /etc/letsencrypt-uweb var passwd = "uriegel";
+//     TODO passwd in /etc/letsencrypt-uweb var passwd = "";
 //     var pfx = pfxBuilder.Build(certRequest.Data.CommonName, passwd);
 //     Console.WriteLine($"Saving certificate"); 
 //     File.WriteAllBytes(certificateFile, pfx);
-// }
-// catch (Exception e)
-// {
-//     Console.Error.WriteLine($"Exception: {e}");
-// }
-
 
 
 

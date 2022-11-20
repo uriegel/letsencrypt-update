@@ -1,19 +1,22 @@
 module Account 
 
-open System.IO
-open System.Text.Json
-open FSharpTools
-
-open Parameters
-open Letsencryptcert
 open Certes
 open Certes.Acme
+open FSharpTools
+open FSharpTools.Functional
+open System.IO
+open System.Text.Json
+
+open Letsencryptcert
+open Parameters
 
 let private options = JsonSerializerOptions (PropertyNameCaseInsensitive = true)
 
-let readRequest requestFile =
-    use file = File.OpenRead requestFile
-    JsonSerializer.Deserialize<CertRequest> (file, options)
+let readRequest =
+    let readRequest requestFile =
+        use file = File.OpenRead requestFile
+        JsonSerializer.Deserialize<CertRequest> (file, options)
+    memoize readRequest
 
 let create () = async {
     printfn "Creating letsencrypt account"

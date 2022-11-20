@@ -60,7 +60,7 @@ let getCertFile =
     memoizeSingle getCertFile
     
 let getAccountFile = 
-    let getName () = if (get()).Staging then "accounts-staging.pem" else "accounts.pem"
+    let getName () = if (get()).Staging then "account-staging.pem" else "account.pem"
     let getAccountFile () =
         getEncryptDirectory ()
         |> Directory.attachSubPath (getName ())
