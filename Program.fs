@@ -46,13 +46,11 @@ match Parameters.get () with
     |> printError
     |> Async.RunSynchronously
 
-// TODO delete all token files
+// TODO Check pfx file on windows and add readme
+// TODO delete all token files: check if file contains a dot then it is not a token
 printfn "Letsencrypt certificate handling finished"
 
-// using System.Security.Cryptography.X509Certificates;
-// using Certes;
-// using Certes.Acme;
-
+// TODO check certificate if too old
 //     var certificateFile = Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx");
 //     CertRequest certRequest = null;
 //     else  
@@ -74,67 +72,4 @@ printfn "Letsencrypt certificate handling finished"
 
 
 
-//     var authorizations = (await order.Authorizations()).ToArray();
-//     foreach (var authorization in authorizations)
-//         await ValidateAsync(authorization);
-
-//     Console.WriteLine($"Ordering certificate"); 
-//     var privateKey = KeyFactory.NewKey(KeyAlgorithm.ES256);
-//     var cert = await order.Generate(new CsrInfo
-//     {
-//         CountryName = certRequest.Data.CountryName,
-//         State = certRequest.Data.State,
-//         Locality = certRequest.Data.Locality,
-//         Organization = certRequest.Data.Organization,
-//         OrganizationUnit = certRequest.Data.OrganizationUnit,
-//         CommonName = certRequest.Data.CommonName,
-//     }, privateKey);
-
-//     Console.WriteLine($"Creating certificate"); 
-//     var certPem = cert.ToPem();
-//     var pfxBuilder = cert.ToPfx(privateKey);
-
-//     //var passwordFile = Path.Combine(encryptDirectory, $"passwd{(staging ? "-staging" : "")}");
-//     //var passwd = Guid.NewGuid().ToString();
-//     // File.WriteAllText(passwordFile, passwd);
-//     TODO passwd in /etc/letsencrypt-uweb var passwd = "";
-//     var pfx = pfxBuilder.Build(certRequest.Data.CommonName, passwd);
-//     Console.WriteLine($"Saving certificate"); 
-//     File.WriteAllBytes(certificateFile, pfx);
-
-
-
-// async Task ValidateAsync(IAuthorizationContext authorization)
-// {
-//     try 
-//     {
-//         var httpChallenge = await authorization.Http();
-//         var keyAuthz = httpChallenge.KeyAuthz;
-//         var token = httpChallenge.Token;
-//         Console.WriteLine($"Validating LetsEncrypt token: {token}"); 
-//         await File.WriteAllTextAsync(Path.Combine(encryptDirectory, "token"), keyAuthz);
-
-//         while (true)
-//         {
-//             var challenge = await httpChallenge.Validate();
-//             Console.WriteLine($"Challenge: {challenge.Error}, {challenge.Status} {challenge.Validated}"); 
-//             if (challenge.Status == Certes.Acme.Resource.ChallengeStatus.Invalid)
-//             {
-//                 Console.WriteLine($"Could not validate LetsEncrypt token: {token}"); 
-//                 throw new Exception("Not valid");
-//             }
-//             if (challenge.Status == Certes.Acme.Resource.ChallengeStatus.Valid)
-//                 break;
-//             await Task.Delay(2000);
-//         }
-//     }
-//     finally
-//     {
-//         try 
-//         {
-//             File.Delete(Path.Combine(encryptDirectory, "token"));
-//         }
-//         catch {}
-//     }
-// }
 

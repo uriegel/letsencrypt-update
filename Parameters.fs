@@ -4,6 +4,8 @@ open System
 open FSharpTools
 open FSharpTools.Functional
 open Certes.Acme
+open Certes.Acme.Resource
+open System.IO
 
 type Mode =
 | Create
@@ -73,3 +75,19 @@ let getAcmeUri =
             then WellKnownServers.LetsEncryptStagingV2 
         else WellKnownServers.LetsEncryptV2    
     memoizeSingle getAcmeUri
+
+let getPfxPassword = 
+    let getPfxPassword () = 
+        let readAllText path = File.ReadAllText path
+
+        if OperatingSystem.IsLinux () then "/etc" else System.Environment.GetFolderPath System.Environment.SpecialFolder.CommonApplicationData
+        |> Directory.attachSubPath "letsencrypt-uweb"
+        |> readAllText
+        |> String.trim
+    memoizeSingle getPfxPassword
+
+let getPfxFile = 
+    let getPfxFile () = 
+        getEncryptDirectory ()
+        |> Directory.attachSubPath (if (get()).Staging then "certificate-staging.pfx" else "certificate.pfx")
+    memoizeSingle getPfxFile
