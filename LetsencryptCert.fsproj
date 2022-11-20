@@ -35,8 +35,8 @@ Converted to F#
     <None Include="README.md" pack="true" PackagePath="." />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Certes" Version="3.0.0" />
     <PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1" />
     <PackageReference Include="FSharpTools" Version="9.2.1" />
+    <PackageReference Include="Webprofusion.Certes" Version="2.4.1" />
   </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@ module Certificate
 open Certes
 open Certes.Acme
 open System.IO
+open System.Security.Cryptography.X509Certificates
 
 let order (order: IOrderContext): Async<Result<Unit, string>> = async {    
     printfn "Ordering certificate" 
@@ -20,9 +21,16 @@ let order (order: IOrderContext): Async<Result<Unit, string>> = async {
 
     printfn "Creating certificate" 
     let certPem = cert.ToPem ()
-    let pfxBuilder = cert.ToPfx privateKey
+    let certKey = privateKey.ToPem ()
+
+    let x509 = X509Certificate2.CreateFromPem (certPem.ToCharArray (), certKey.ToCharArray ())
+    let pfxBytes = x509.Export (X509ContentType.Pfx, "cvbcvbcvbcvbcbxcb xcvb cxb xcb xcb xcvb xcvb xcb xcvb xcvb xcb xcvb xcvb xcvb cvxb xc")
+    let zertifikat = "/home/uwe/certificate.pfx"
+    File.WriteAllBytes (zertifikat, pfxBytes)
+
+    let pfxBuilder = cert.ToPfx 
 //     TODO passwd in /etc/letsencrypt-uweb var passwd = "";
-//    let pfx = pfxBuilder.Build (certInfo.Data.CommonName, passwd)
+
     printfn "Saving certificate" 
 
     // let certificateFile = Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx");
