@@ -30,10 +30,17 @@ Converted to F#
     <Compile Include="Certificate.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="LICENSE" pack="true" PackagePath="." />
     <None Include="README.md" pack="true" PackagePath="." />
   </ItemGroup>
+
+
   <ItemGroup>
     <PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1" />
     <PackageReference Include="FSharpTools" Version="9.4.1" />
