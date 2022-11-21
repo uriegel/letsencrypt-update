@@ -46,7 +46,6 @@ match Parameters.get () with
     |> printError
     |> Async.RunSynchronously
 
-// TODO Check pfx file on windows and add readme
 // TODO delete all token files: check if file contains a dot then it is not a token
 printfn "Letsencrypt certificate handling finished"
 

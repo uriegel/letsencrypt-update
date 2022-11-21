@@ -80,7 +80,12 @@ let getPfxPassword =
     let getPfxPassword () = 
         let readAllText path = File.ReadAllText path
 
-        if OperatingSystem.IsLinux () then "/etc" else System.Environment.GetFolderPath System.Environment.SpecialFolder.CommonApplicationData
+        if OperatingSystem.IsLinux () 
+            then 
+                "/etc" 
+            else 
+                System.Environment.GetFolderPath System.Environment.SpecialFolder.CommonApplicationData
+                |> Directory.attachSubPath "LetsencryptUweb"
         |> Directory.attachSubPath "letsencrypt-uweb"
         |> readAllText
         |> String.trim
