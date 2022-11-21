@@ -1,7 +1,16 @@
 ﻿open Certes.Acme
 open FSharpTools
+open System
+open System.IO
+
 open Parameters
-open Async
+open Result
+
+// TODO FSharpTools
+let stringisEmpty str = 
+    String.IsNullOrEmpty str
+// TODO FSharpTools
+let (|>>) x f = map f x
 
 let retrieveCert (order: IOrderContext) result = async { 
     return! 
@@ -10,7 +19,20 @@ let retrieveCert (order: IOrderContext) result = async {
         | Error err -> result |> Async.toAsync
 }
 
-open Authorization
+let deleteAllTokens () = 
+    let filterToken (fileInfo: FileInfo) =
+        fileInfo.Extension |> stringisEmpty
+    
+    let deleteToken (fileInfo: FileInfo) =
+        File.Delete fileInfo.FullName
+
+    getEncryptDirectory ()
+    |> Directory.getFiles
+    |>> Array.filter filterToken
+    |>> Array.iter deleteToken
+    
+open Async
+
 let performOrder (order: IOrderContext) = 
     Authorization.validateAll order
     >>= retrieveCert order
