@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>uwebcert</ToolCommandName>
+    <ToolCommandName>LetsencryptCert</ToolCommandName>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <Version>3.0.0</Version>

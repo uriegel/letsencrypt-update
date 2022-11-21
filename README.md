@@ -53,8 +53,18 @@ LetsencryptCert -create -prod
 LetsencryptCert -prod
 ```
 
-## cron job running every day:
+## Executing tool every day (Linux)
 
 ```
-sudo ~/.dotnet/tools/uwebcert -prod
-``` 
+crontab -e
+```
+
+Append
+
+```
+PATH=$PATH:/home/pi/.dotnet/tools
+DOTNET_ROOT=/home/pi/.dotnet
+0 4 * * * LetsencryptCert > /home/pi/logs/LetsencryptCert.log 2>&1
+```
+
+This executes dns update every day at 4 AM (universal time). Last log is saved in ```/home/pi/logs/LetsencryptCert.log```
