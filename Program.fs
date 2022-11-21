@@ -6,12 +6,6 @@ open System.IO
 open Parameters
 open Result
 
-// TODO FSharpTools
-let stringisEmpty str = 
-    String.IsNullOrEmpty str
-// TODO FSharpTools
-let (|>>) x f = map f x
-
 let retrieveCert (order: IOrderContext) result = async { 
     return! 
         match result with
@@ -21,7 +15,7 @@ let retrieveCert (order: IOrderContext) result = async {
 
 let deleteAllTokens () = 
     let filterToken (fileInfo: FileInfo) =
-        fileInfo.Extension |> stringisEmpty
+        fileInfo.Extension |> String.isEmpty
     
     let deleteToken (fileInfo: FileInfo) =
         File.Delete fileInfo.FullName
@@ -63,34 +57,13 @@ let printError result = async {
 printfn "Starting letsencrypt certificate handling"
 match Parameters.get () with
 | { Value.Mode = Create } -> Account.create () |> Async.RunSynchronously
-| _                       -> 
+| _ when not <| Certificate.checkValidationTime () -> 
     perform () 
     |> printError
     |> Async.RunSynchronously
+| _ -> printfn "No further action needed"
 
-// TODO delete all token files: check if file contains a dot then it is not a token
+deleteAllTokens ()
+|> throw
+
 printfn "Letsencrypt certificate handling finished"
-
-// TODO check certificate if too old
-//     var certificateFile = Path.Combine(encryptDirectory, $"certificate{(staging ? "-staging" : "")}.pfx");
-//     CertRequest certRequest = null;
-//     else  
-//     {
-//         if (File.Exists(certificateFile))
-//         {
-//             var certificate = new X509Certificate2(certificateFile, "uriegel");
-
-//             Console.WriteLine($"Certificate expires: {certificate.NotAfter}");
-//             if (certificate.NotAfter > DateTime.Now + TimeSpan.FromDays(30))
-//             {
-//                 Console.WriteLine("No further action needed");
-//                 return;
-//             }                    
-//         }
-//         certRequest = await ReadAccountAsync(staging);
-//     }
-
-
-
-
-

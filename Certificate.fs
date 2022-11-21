@@ -2,8 +2,13 @@ module Certificate
 
 open Certes
 open Certes.Acme
+open FSharpTools
+open FSharpTools.Functional
+open System
 open System.IO
 open System.Security.Cryptography.X509Certificates
+
+open Option
 
 let order (order: IOrderContext): Async<Result<Unit, string>> = async {    
     printfn "Ordering certificate" 
@@ -29,5 +34,23 @@ let order (order: IOrderContext): Async<Result<Unit, string>> = async {
     File.WriteAllBytes (Parameters.getPfxFile (), pfxBytes)
     return Ok ()
 }
+
+let checkValidationTime () =
+    let printValidationDate (certificate: X509Certificate2) = 
+        printfn "Certificate expires:%O" certificate.NotAfter
+
+    let openPfx () = 
+        match Parameters.getPfxFile () |> Directory.existsFile with
+        | true -> Some (new X509Certificate2 (Parameters.getPfxFile (), Parameters.getPfxPassword ())
+                        |> sideEffect printValidationDate)
+        | false -> None
+    
+    let checkValidationTime (certificate: X509Certificate2) = 
+        certificate.NotAfter > DateTime.Now + TimeSpan.FromDays 30
+
+    openPfx ()
+    |>> checkValidationTime
+    |> defaultValue false  
+
 
 

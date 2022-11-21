@@ -6,7 +6,6 @@ open Certes.Acme.Resource
 open FSharp.Control
 open FSharpTools
 open FSharpTools.AsyncResult
-open FSharpTools.Functional
 open System
 open System.IO
 
