@@ -1,5 +1,3 @@
-// module Account 
-
 // open Certes
 // open Certes.Acme
 // open FSharpTools
@@ -10,6 +8,13 @@
 // open Letsencryptcert
 // open Parameters
 
+static class Account
+{
+    public static void Create()
+    {
+        
+    }
+}
 // let private options = JsonSerializerOptions (PropertyNameCaseInsensitive = true)
 
 // let readRequest =

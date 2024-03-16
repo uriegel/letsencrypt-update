@@ -1,98 +1,95 @@
-// module Parameters
-
-// open System
-// open FSharpTools
-// open FSharpTools.Functional
 // open Certes.Acme
 // open Certes.Acme.Resource
 // open System.IO
+using System.Security.Cryptography;
+using CsTools.Extensions;
 
-// type Mode =
-// | Create
-// | Operate
-// | Delete
+using static System.Console;
+using static CsTools.Functional.Memoization;
 
-// type Value = {
-//     Staging: bool
-//     Mode: Mode
-// }
+record Parameters(
+    bool Staging,
+    OperationMode Mode
+) {
+    public static Func<Parameters> Get { get; }
+        = Memoize(Init);
 
-// /// Evaluating command args
-// /// 
-// /// the following arguments are valid:
-// /// 
-// /// * ```-prod``` productive, without: staging (test)
-// /// * ```-create``` creates file cert.json, then exits. Setup step
-// /// * ```-del``` delete account
-// /// 
-// ///**Returns**
-// /// ```Value``` object
-// let get = 
-//     let get () = 
-        
-//         let printProductive b =
-//             if b then "!!! P R O D U C T I V E !!!" else "Staging" 
-//             |> printfn "%s"
+    public static Func<string> GetEncryptDirectory { get; }
+        = Memoize(InitEncryptDirectory);
+    static Parameters Init()
+        => Environment.GetCommandLineArgs()
+            .Pipe(args => new Parameters(
+                args
+                    .Contains("-prod")
+                    .SideEffect(n => WriteLine(n ? "!!! P R O D U C T I V E !!!" : "Staging"))
+                    != true,
+                (args.Contains("-create"), args.Contains("-del")) switch
+                {
+                    (true, false) => OperationMode.Create,
+                    (false, true) => OperationMode.Delete,
+                    _ => OperationMode.Operate
+                })
+                    .SideEffect(WriteLine)
+            );
 
-//         let args = Environment.GetCommandLineArgs ()
-//         {
-//             Staging = 
-//                 args 
-//                 |> Array.contains "-prod" 
-//                 |> sideEffect printProductive 
-//                 |> not
-//             Mode = 
-//                 match args |> Array.contains "-create", args |> Array.contains "-del" with
-//                 | true, false -> Create
-//                 | false, true -> Delete
-//                 | _           -> Operate
-//         }
-//     memoizeSingle get
+    public static string InitEncryptDirectory()
+        => Environment
+            .GetFolderPath(Environment.SpecialFolder.ApplicationData)
+            .AppendPath("letsencrypt-uweb");
 
-// let getEncryptDirectory =
-//     let getEncryptDirectory () =
-//         Environment.GetFolderPath Environment.SpecialFolder.ApplicationData
-//         |> Directory.attachSubPath "letsencrypt-uweb"
-//     memoizeSingle getEncryptDirectory
 
-// let getCertFile = 
-//     let getCertFile () = 
-//         getEncryptDirectory ()
-//         |> Directory.attachSubPath "cert.json"
-//     memoizeSingle getCertFile
-    
-// let getAccountFile = 
-//     let getName () = if (get()).Staging then "account-staging.pem" else "account.pem"
-//     let getAccountFile () =
-//         getEncryptDirectory ()
-//         |> Directory.attachSubPath (getName ())
 
-//     memoizeSingle getAccountFile
+    // string? GetEnvironmentVariableWithLogging(this string key)
+    //     => key
+    //         .GetEnvironmentVariable()
+    //         ?.SideEffect(v => WriteLine($"Reading environment {key}: {v}"));
 
-// let getAcmeUri = 
-//     let getAcmeUri () = 
-//         if (get()).Staging 
-//             then WellKnownServers.LetsEncryptStagingV2 
-//         else WellKnownServers.LetsEncryptV2    
-//     memoizeSingle getAcmeUri
+    // let get = 
+    //     let get () = 
 
-// let getPfxPassword = 
-//     let getPfxPassword () = 
-//         let readAllText path = File.ReadAllText path
+    //         {
+    //         }
+    //     memoizeSingle get
 
-//         if OperatingSystem.IsLinux () 
-//             then 
-//                 "/etc" 
-//             else 
-//                 System.Environment.GetFolderPath System.Environment.SpecialFolder.CommonApplicationData
-//                 |> Directory.attachSubPath "LetsencryptUweb"
-//         |> Directory.attachSubPath "letsencrypt-uweb"
-//         |> readAllText
-//         |> String.trim
-//     memoizeSingle getPfxPassword
+    // let getCertFile = 
+    //     let getCertFile () = 
+    //         getEncryptDirectory ()
+    //         |> Directory.attachSubPath "cert.json"
+    //     memoizeSingle getCertFile
 
-// let getPfxFile = 
-//     let getPfxFile () = 
-//         getEncryptDirectory ()
-//         |> Directory.attachSubPath (if (get()).Staging then "certificate-staging.pfx" else "certificate.pfx")
-//     memoizeSingle getPfxFile
+    // let getAccountFile = 
+    //     let getName () = if (get()).Staging then "account-staging.pem" else "account.pem"
+    //     let getAccountFile () =
+    //         getEncryptDirectory ()
+    //         |> Directory.attachSubPath (getName ())
+
+    //     memoizeSingle getAccountFile
+
+    // let getAcmeUri = 
+    //     let getAcmeUri () = 
+    //         if (get()).Staging 
+    //             then WellKnownServers.LetsEncryptStagingV2 
+    //         else WellKnownServers.LetsEncryptV2    
+    //     memoizeSingle getAcmeUri
+
+    // let getPfxPassword = 
+    //     let getPfxPassword () = 
+    //         let readAllText path = File.ReadAllText path
+
+    //         if OperatingSystem.IsLinux () 
+    //             then 
+    //                 "/etc" 
+    //             else 
+    //                 System.Environment.GetFolderPath System.Environment.SpecialFolder.CommonApplicationData
+    //                 |> Directory.attachSubPath "LetsencryptUweb"
+    //         |> Directory.attachSubPath "letsencrypt-uweb"
+    //         |> readAllText
+    //         |> String.trim
+    //     memoizeSingle getPfxPassword
+
+    // let getPfxFile = 
+    //     let getPfxFile () = 
+    //         getEncryptDirectory ()
+    //         |> Directory.attachSubPath (if (get()).Staging then "certificate-staging.pfx" else "certificate.pfx")
+    //     memoizeSingle getPfxFile
+}

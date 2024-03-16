@@ -1,4 +1,9 @@
-﻿Console.WriteLine("Bin da");
+﻿using System.Security.Cryptography;
+using CsTools;
+using CsTools.Extensions;
+using Org.BouncyCastle.Crypto.Digests;
+using static System.Console;
+
 // open Certes.Acme
 // open FSharpTools
 // open System
@@ -14,18 +19,6 @@
 //         | Error err -> result |> Async.toAsync
 // }
 
-// let deleteAllTokens () = 
-//     let filterToken (fileInfo: FileInfo) =
-//         fileInfo.Extension |> String.isEmpty
-    
-//     let deleteToken (fileInfo: FileInfo) =
-//         File.Delete fileInfo.FullName
-
-//     getEncryptDirectory ()
-//     |> Directory.getFiles
-//     |>> Array.filter filterToken
-//     |>> Array.iter deleteToken
-    
 // open Async
 
 // let performOrder (order: IOrderContext) = 
@@ -55,16 +48,24 @@
 //     | Error err -> err |> printfn ("An error has occurred: %s")
 // }
 
-// printfn "Starting letsencrypt certificate handling"
-// match Parameters.get () with
-// | { Value.Mode = Create } -> Account.create () |> Async.RunSynchronously
-// | _ when not <| Certificate.checkValidationTime () -> 
-//     perform () 
-//     |> printError
-//     |> Async.RunSynchronously
-// | _ -> printfn "No further action needed"
+WriteLine("Starting letsencrypt certificate handling");
 
-// deleteAllTokens ()
-// |> throw
+(Parameters.Get() switch
+{
+    { Staging: true, Mode: OperationMode.Create } => 1.SideEffect(_ => Account.Create()),
+    // | _ when not <| Certificate.checkValidationTime () -> 
+    //     perform () 
+    //     |> printError
+    _ => 3.SideEffect(_ => WriteLine("No further action needed"))
+})
+    .SideEffect(_ => DeleteAllTokens());
 
-// printfn "Letsencrypt certificate handling finished"
+WriteLine("Letsencrypt certificate handling finished");
+
+static void DeleteAllTokens() 
+    => Parameters
+        .GetEncryptDirectory()
+        .GetFiles()
+        .Where(n => !string.IsNullOrEmpty(n.Extension))
+        .ForEach(n => File.Delete(n.FullName));
+
