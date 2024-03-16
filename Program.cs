@@ -25,7 +25,33 @@ using static System.Console;
 //     Authorization.validateAll order
 //     >>= retrieveCert order
 
-// let perform () = async {
+// let printError result = async {
+//     match! result with
+//     | Ok _ -> return ()
+//     | Error err -> err |> printfn ("An error has occurred: %s")
+// }
+
+WriteLine("Starting letsencrypt certificate handling");
+
+await (Parameters.Get() switch
+{
+    { Staging: true, Mode: OperationMode.Create } => 1.ToAsync().SideEffect(async _ => Account.Create()),
+    _ when !Certificate.CheckValidationTime() => 2.ToAsync().SideEffect(_ => Perform()),
+    _ => 3.ToAsync().SideEffect(async _ => WriteLine("No further action needed"))
+})
+    .SideEffect(async _ => DeleteAllTokens());
+
+WriteLine("Letsencrypt certificate handling finished");
+
+static void DeleteAllTokens() 
+    => Parameters
+        .GetEncryptDirectory()
+        .GetFiles()
+        .Where(n => !string.IsNullOrEmpty(n.Extension))
+        .ForEach(n => File.Delete(n.FullName));
+
+static async Task Perform()
+{
 //     let! acme = Account.get ()
 
 //     let getCertData () = 
@@ -40,32 +66,5 @@ using static System.Console;
 //         acme.NewOrder (getCertData ()).Domains 
 //         |> Async.AwaitTask
 //         >>= performOrder
-// }
 
-// let printError result = async {
-//     match! result with
-//     | Ok _ -> return ()
-//     | Error err -> err |> printfn ("An error has occurred: %s")
-// }
-
-WriteLine("Starting letsencrypt certificate handling");
-
-(Parameters.Get() switch
-{
-    { Staging: true, Mode: OperationMode.Create } => 1.SideEffect(_ => Account.Create()),
-    // | _ when not <| Certificate.checkValidationTime () -> 
-    //     perform () 
-    //     |> printError
-    _ => 3.SideEffect(_ => WriteLine("No further action needed"))
-})
-    .SideEffect(_ => DeleteAllTokens());
-
-WriteLine("Letsencrypt certificate handling finished");
-
-static void DeleteAllTokens() 
-    => Parameters
-        .GetEncryptDirectory()
-        .GetFiles()
-        .Where(n => !string.IsNullOrEmpty(n.Extension))
-        .ForEach(n => File.Delete(n.FullName));
-
+}

@@ -1,14 +1,23 @@
-// module Certificate
-
 // open Certes
 // open Certes.Acme
-// open FSharpTools
-// open FSharpTools.Functional
-// open System
-// open System.IO
-// open System.Security.Cryptography.X509Certificates
+using System.Security.Cryptography.X509Certificates;
+using CsTools.Extensions;
 
-// open Option
+using static System.Console;
+
+static class Certificate
+{
+    public static bool CheckValidationTime()
+        => Parameters
+            .GetPfxFile()
+            .Pipe(p =>
+                File.Exists(p)
+                ? p
+                : null)
+            ?.Pipe(p => new X509Certificate2(p, Parameters.GetPfxPassword())
+                            .SideEffect(c => WriteLine($"Certificate expires: {c.NotAfter}")))
+            ?.Pipe(c => c.NotAfter > DateTime.Now + TimeSpan.FromDays(30)) == true;
+    
 
 // let order (order: IOrderContext): Async<Result<Unit, string>> = async {    
 //     printfn "Ordering certificate" 
@@ -33,24 +42,7 @@
 //     printfn "Saving certificate" 
 //     File.WriteAllBytes (Parameters.getPfxFile (), pfxBytes)
 //     return Ok ()
-// }
-
-// let checkValidationTime () =
-//     let printValidationDate (certificate: X509Certificate2) = 
-//         printfn "Certificate expires:%O" certificate.NotAfter
-
-//     let openPfx () = 
-//         match Parameters.getPfxFile () |> Directory.existsFile with
-//         | true -> Some (new X509Certificate2 (Parameters.getPfxFile (), Parameters.getPfxPassword ())
-//                         |> sideEffect printValidationDate)
-//         | false -> None
-    
-//     let checkValidationTime (certificate: X509Certificate2) = 
-//         certificate.NotAfter > DateTime.Now + TimeSpan.FromDays 30
-
-//     openPfx ()
-//     |>> checkValidationTime
-//     |> defaultValue false  
+}
 
 
 

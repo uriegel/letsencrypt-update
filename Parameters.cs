@@ -16,6 +16,13 @@ record Parameters(
 
     public static Func<string> GetEncryptDirectory { get; }
         = Memoize(InitEncryptDirectory);
+
+    public static Func<string> GetPfxFile { get; }
+        = Memoize(InitGetPfxFile);
+
+    public static Func<string> GetPfxPassword { get; }
+        = Memoize(InitGetPfxPassword);
+
     static Parameters Init()
         => Environment.GetCommandLineArgs()
             .Pipe(args => new Parameters(
@@ -32,12 +39,24 @@ record Parameters(
                     .SideEffect(WriteLine)
             );
 
-    public static string InitEncryptDirectory()
+    static string InitEncryptDirectory()
         => Environment
             .GetFolderPath(Environment.SpecialFolder.ApplicationData)
             .AppendPath("letsencrypt-uweb");
 
+    static string InitGetPfxFile()
+        => GetEncryptDirectory()
+            .AppendPath(Get().Staging ? "certificate-staging.pfx" : "certificate.pfx");
 
+    static string InitGetPfxPassword()
+        => Get()
+            .Staging
+                ? "/etc"
+                : Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
+            .AppendPath("LetsencryptUweb")
+            .ReadAllTextFromFilePath()
+            ?.Trim()
+            ?? "".SideEffect(_ => WriteLine("!!!NO PASSWORD!!"));
 
     // string? GetEnvironmentVariableWithLogging(this string key)
     //     => key
@@ -72,24 +91,4 @@ record Parameters(
     //         else WellKnownServers.LetsEncryptV2    
     //     memoizeSingle getAcmeUri
 
-    // let getPfxPassword = 
-    //     let getPfxPassword () = 
-    //         let readAllText path = File.ReadAllText path
-
-    //         if OperatingSystem.IsLinux () 
-    //             then 
-    //                 "/etc" 
-    //             else 
-    //                 System.Environment.GetFolderPath System.Environment.SpecialFolder.CommonApplicationData
-    //                 |> Directory.attachSubPath "LetsencryptUweb"
-    //         |> Directory.attachSubPath "letsencrypt-uweb"
-    //         |> readAllText
-    //         |> String.trim
-    //     memoizeSingle getPfxPassword
-
-    // let getPfxFile = 
-    //     let getPfxFile () = 
-    //         getEncryptDirectory ()
-    //         |> Directory.attachSubPath (if (get()).Staging then "certificate-staging.pfx" else "certificate.pfx")
-    //     memoizeSingle getPfxFile
 }
