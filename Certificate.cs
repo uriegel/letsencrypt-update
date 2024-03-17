@@ -1,6 +1,7 @@
-// open Certes
-// open Certes.Acme
 using System.Security.Cryptography.X509Certificates;
+using Certes;
+using Certes.Acme;
+using CsTools;
 using CsTools.Extensions;
 
 using static System.Console;
@@ -13,35 +14,37 @@ static class Certificate
             .Pipe(p =>
                 File.Exists(p)
                 ? p
-                : null)
+                : (null as string)
+                    .SideEffect(_ => WriteLine("Pfx file does not exist, please run -create")))
             ?.Pipe(p => new X509Certificate2(p, Parameters.GetPfxPassword())
                             .SideEffect(c => WriteLine($"Certificate expires: {c.NotAfter}")))
-            ?.Pipe(c => c.NotAfter > DateTime.Now + TimeSpan.FromDays(30)) == true;
-    
+            ?.Pipe(c => c.NotAfter > DateTime.Now + TimeSpan.FromDays(30)) != false;
 
-// let order (order: IOrderContext): Async<Result<Unit, string>> = async {    
-//     printfn "Ordering certificate" 
-    
-//     let certInfo = Account.readRequest <| Parameters.getCertFile ()
-//     let privateKey = KeyFactory.NewKey KeyAlgorithm.ES256
-//     let! cert = order.Generate (CsrInfo (
-//             CountryName = certInfo.Data.CountryName, 
-//             State = certInfo.Data.State,
-//             Locality = certInfo.Data.Locality, 
-//             Organization = certInfo.Data.Organization,
-//             OrganizationUnit = certInfo.Data.OrganizationUnit,
-//             CommonName = certInfo.Data.CommonName
-//         ), privateKey) |> Async.AwaitTask
 
-//     printfn "Creating certificate" 
-//     let certPem = cert.ToPem ()
-//     let certKey = privateKey.ToPem ()
+    public static async Task<Unit> Order(IOrderContext order)
+    {
+        WriteLine("Ordering certificate");
 
-//     let x509 = X509Certificate2.CreateFromPem (certPem.ToCharArray (), certKey.ToCharArray ())
-//     let pfxBytes = x509.Export (X509ContentType.Pfx, Parameters.getPfxPassword ())
-//     printfn "Saving certificate" 
-//     File.WriteAllBytes (Parameters.getPfxFile (), pfxBytes)
-//     return Ok ()
+        var privateKey = KeyFactory.NewKey(KeyAlgorithm.ES256);
+        var cert = await order.Generate(new CsrInfo
+        {
+            CountryName = Account.ReadRequest()!.Data.CountryName,
+            State = Account.ReadRequest()!.Data.State,
+            Locality = Account.ReadRequest()!.Data.Locality,
+            Organization = Account.ReadRequest()!.Data.Organization,
+            OrganizationUnit = Account.ReadRequest()!.Data.OrganizationUnit,
+            CommonName = Account.ReadRequest()!.Data.CommonName
+        }, privateKey);
+
+        WriteLine("Creating certificate");
+        var certPem = cert.ToPem();
+        var certKey = privateKey.ToPem();
+        var x509 = X509Certificate2.CreateFromPem(certPem.ToCharArray(), certKey.ToCharArray());
+        var pfxBytes = x509.Export(X509ContentType.Pfx, Parameters.GetPfxPassword());
+        WriteLine("Saving certificate");
+        File.WriteAllBytes(Parameters.GetPfxFile(), pfxBytes);
+        return Unit.Value;
+    }
 }
 
 

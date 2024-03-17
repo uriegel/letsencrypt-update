@@ -1,41 +1,12 @@
-﻿using System.Security.Cryptography;
-using CsTools;
-using CsTools.Extensions;
-using Org.BouncyCastle.Crypto.Digests;
+﻿using CsTools.Extensions;
+using CsTools.Functional;
 using static System.Console;
-
-// open Certes.Acme
-// open FSharpTools
-// open System
-// open System.IO
-
-// open Parameters
-// open Result
-
-// let retrieveCert (order: IOrderContext) result = async { 
-//     return! 
-//         match result with
-//         | Ok _ -> Certificate.order order
-//         | Error err -> result |> Async.toAsync
-// }
-
-// open Async
-
-// let performOrder (order: IOrderContext) = 
-//     Authorization.validateAll order
-//     >>= retrieveCert order
-
-// let printError result = async {
-//     match! result with
-//     | Ok _ -> return ()
-//     | Error err -> err |> printfn ("An error has occurred: %s")
-// }
 
 WriteLine("Starting letsencrypt certificate handling");
 
 await (Parameters.Get() switch
 {
-    { Staging: true, Mode: OperationMode.Create } => 1.ToAsync().SideEffectAsync(_ => Account.Create()),
+    { Staging: true, Mode: OperationMode.Create } => 1.ToAsync().SideEffectAwait(_ => Account.Create()),
     _ when !Certificate.CheckValidationTime() => 2.ToAsync().SideEffectAwait( _ => Perform()),
     _ => 3.ToAsync().SideEffectAsync(_ => WriteLine("No further action needed"))
 })
@@ -51,31 +22,25 @@ static void DeleteAllTokens()
         .ForEach(n => File.Delete(n.FullName));
 
 static Task Perform()
-{
-    Certes.AcmeContext? c= null;
-    var x = c?.NewOrder(Account.ReadRequest()?.Domains).GetOrNull(); 
-    var xx = x.GetOrNull();
-
-    var t = Account
+    => Account
                 .Get()
-                .SelectManyMaybe(c => xx);
+                .SelectAwait(c => c.NewOrder(
+                                        Account
+                                            .ReadRequest()
+                                            ?.Domains
+                                            ?.SideEffectForAll(d => WriteLine($"Registering domain: {d}"))
+                                            ?.ToArray()
+                                            ?? []))
+                .SelectError(_ => "")
+                .BindAwait(Authorizations.ValidateAll)
+                .SelectAwait(Certificate.Order)
+                .ToResult()
+                .SideEffectAsync(t => t.Match(
+                                    _ => WriteLine("Certificate successfully retrieved"),
+                                    e => WriteLine($"An error has occurred: {e}")));
+                            
+                
+                
+                
 
 
-    // var t =  Account
-    //     .Get()
-    //     .SelectManyMaybe(c => c?.NewOrder(Account.ReadRequest()?.Domains))
-
-//     let getCertData () = 
-//         getCertFile ()
-//         |> Account.readRequest 
-
-//     (getCertData ()).Domains 
-//     |> String.joinStr ", "
-//     |> printfn "Registering domains: %s"  
-
-//     return! 
-//         acme.NewOrder (getCertData ()).Domains 
-//         |> Async.AwaitTask
-//         >>= performOrder
-
-}

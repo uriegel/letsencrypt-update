@@ -18,8 +18,8 @@ record Parameters(
     public static Func<string> GetPfxFile { get; }
         = Memoize(InitGetPfxFile);
 
-    public static Func<string> GetCertFile { get; }
-        = Memoize(InitGetCertFile);
+    public static Func<string?> GetCertFile { get; }
+        = MemoizeMaybe(InitGetCertFile);
 
     public static Func<string> GetAccountFile { get; }
         = Memoize(InitGetAccountFile);
@@ -55,9 +55,11 @@ record Parameters(
         => GetEncryptDirectory()
             .AppendPath(Get().Staging ? "certificate-staging.pfx" : "certificate.pfx");
 
-    static string InitGetCertFile()
+    static string? InitGetCertFile()
         => GetEncryptDirectory()
-            .AppendPath("cert.json");
+            .AppendPath("cert.json")
+            .CheckIfFileExists();
+            
 
     static string InitGetAccountFile()
         => GetEncryptDirectory()

@@ -1,79 +1,75 @@
-// module Authorization
+using Certes;
+using Certes.Acme;
+using CsTools;
+using CsTools.Async;
+using CsTools.Extensions;
+using CsTools.Functional;
 
-// open Certes;
-// open Certes.Acme
-// open Certes.Acme.Resource
-// open FSharp.Control
-// open FSharpTools
-// open FSharpTools.AsyncResult
-// open System
-// open System.IO
+using static System.Console;
+using static CsTools.Core;
 
-// open Parameters
-// open Async    
+static class Authorizations
+{
+    public static AsyncResult<IOrderContext, string> ValidateAll(IOrderContext orderContext)
+        => orderContext
+            .Authorizations()
+            .AsAsyncEnumerable()
+            .AggregateAwaitAsync(
+                Ok<Unit, string>(Unit.Value), 
+                (acc, c) => Validate(acc, c).ToValueTask())
+            .FromValueTask()
+            .Select(_ => orderContext);
 
-// let validateAll: IOrderContext->Async<Result<unit, string>> =
+    static ValueTask<Result<T, E>> ToValueTask<T, E>(this AsyncResult<T, E> ae) 
+        where T: notnull
+        where E: notnull
+        => new (ae.ToResult());
 
-//     // Building blocks
+    static AsyncResult<T, E> FromValueTask<T, E>(this ValueTask<Result<T, E>> vt)
+        where T: notnull
+        where E: notnull
+    {
+        static async Task<Result<T, E>> FromValueTask(ValueTask<Result<T, E>> vt)
+            => await vt;
+        return FromValueTask(vt).ToAsyncResult();
+    }
+    static AsyncResult<Unit, string> Validate(Result<Unit, string> state, IAuthorizationContext auth) 
+        => state
+            .ToAsyncResult()
+            .BindAwait(_ => Validate(auth));
 
-//     let validate (state: Result<Unit, string>) (auth: IAuthorizationContext) =
+    static AsyncResult<Unit, string> Validate(IAuthorizationContext auth) 
+    {
+        AsyncResult<Unit, string> Validate() 
+            => auth
+                .Http()
+                .Select(Ok<IChallengeContext, string>)
+                .ToAsyncResult()
+                .SideEffectWhenOk(WriteKeyTokenFile)
+                .BindAwait(ValidateChallenge);
+        return AsyncResultExtensions.RepeatOnError(Validate, 7, TimeSpan.FromSeconds(3));
+    }
+    
+    static AsyncResult<Unit, string> ValidateChallenge(IChallengeContext challenge)
+        => challenge
+            .Validate()
+            .SideEffectAsync(c => WriteLine($"Challenge: {c.Error}, {c.Status}, {c.Validated}"))
+            .Select(c =>
+                c.Status.HasValue
+                ? c.Status.Value == Certes.Acme.Resource.ChallengeStatus.Invalid
+                    ? Error<Unit, string>("not valid".SideEffect(_ => WriteLine($"Could not validate LetsEncrypt token: {c.Token}")))
+                    : c.Status.Value == Certes.Acme.Resource.ChallengeStatus.Valid
+                    ? Ok<Unit, string>(Unit.Value)
+                    : Error<Unit, string>("unknown")
+                : Error<Unit, string>("unknown"))
+            .ToAsyncResult();
 
-//         let printChallengeResult (result: Resource.Challenge) = async {
-//             printfn "Challenge: %O, %O, %O" result.Error result.Status result.Validated 
-//         } 
-
-//         let matchChallengeResult (result: Async<Resource.Challenge>) = async {
-//             let! status = result
-//             return 
-//                 match Option.ofNullable status.Status with
-//                 | Some ChallengeStatus.Invalid -> 
-//                     printfn "Could not validate LetsEncrypt token: %s" status.Token
-//                     Error "not valid"
-//                 | Some ChallengeStatus.Valid -> Ok ()
-//                 | _ -> Error "unknown"
-//         }
-
-//         let validateChallenge (challenge: IChallengeContext) = 
-//             challenge.Validate () 
-//             |> Async.AwaitTask
-//             |> Async.sideEffect printChallengeResult
-//             |> matchChallengeResult
-
-//         let writeKeyTokenFile (challenge: IChallengeContext) = 
-//             File.WriteAllTextAsync (Directory.combinePathes [| 
-//                     getEncryptDirectory () 
-//                     challenge.Token |> Functional.sideEffect (printfn "Validating LetsEncrypt token: %s")
-//                 |], challenge.KeyAuthz)
-//             |> Async.AwaitTask
-
-//         let validate (challenge: Async<IChallengeContext>) = 
-//             let validate () = 
-//                 challenge 
-//                 |> Async.sideEffect writeKeyTokenFile 
-//                 |> Async.bind validateChallenge
-//             validate
-//             |> repeatOnError (TimeSpan.FromSeconds 3) 7            
-
-//         match state with
-//         | Ok _ -> 
-//             auth.Http() 
-//             |> Async.AwaitTask
-//             |> validate
-//         | Error err -> state |> Async.toAsync
-
-//     let getAuthorizations (order: IOrderContext) = 
-//         order.Authorizations () |> Async.AwaitTask
-
-//     let iterAuthorizations (authorizations: IAuthorizationContext seq) = async {
-//         return! authorizations
-//             |> AsyncSeq.ofSeq
-//             |> AsyncSeq.foldAsync validate (Ok ())
-//     }
-
-//     // Function composition
-
-//     getAuthorizations >=> iterAuthorizations
-
-
-
+    static void WriteKeyTokenFile(IChallengeContext challenge)
+        => Parameters
+            .GetEncryptDirectory()
+            .AppendPath(challenge
+                            .Token
+                            .SideEffect(t => WriteLine($"Validating LetsEncrypt token: {t}")))
+            .WriteAllTextToFilePath(challenge.KeyAuthz);
+}
 
