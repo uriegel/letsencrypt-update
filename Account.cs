@@ -1,6 +1,7 @@
 // open Certes.Acme
 using System.Text.Json;
 using Certes;
+using Certes.Acme;
 using CsTools;
 using CsTools.Extensions;
 using CsTools.Functional;
@@ -24,29 +25,23 @@ static class Account
             WriteLine("You have to create a cert request json file, see https://www.nuget.org/packages/LetsencryptCert/");
             return;
         }
-//     if getEncryptDirectory () |> Directory.existsDirectory |> not then 
-//         getEncryptDirectory () 
-//         |> Directory.create 
-//         |> Result.throw 
-//         |> ignore
 
-//     File.Copy ("cert.json", getCertFile (), true)
+        Parameters
+            .GetEncryptDirectory()
+            .EnsureDirectoryExists();
 
-//     let server = 
-//         if (Parameters.get()).Staging then 
-//             WellKnownServers.LetsEncryptStagingV2 
-//         else 
-//             WellKnownServers.LetsEncryptV2
+        File.Copy("cert.json", Parameters.GetCertFile(), true);
 
-//     let acmeContext = AcmeContext server
-//     do! acmeContext.NewAccount (certRequest.Account, true) 
-//         |> Async.AwaitTask 
-//         |> Async.Ignore
+        var server = Parameters.Get().Staging
+            ? WellKnownServers.LetsEncryptStagingV2
+            : WellKnownServers.LetsEncryptV2;
 
-//     let pemKey = acmeContext.AccountKey.ToPem()
-//     File.WriteAllTextAsync (getAccountFile (), pemKey) |> Async.AwaitTask |> ignore
-//     printfn "Letsencrypt account created"
-// }
+        var acmeContext = new AcmeContext(server);
+        await acmeContext.NewAccount(certRequest.Account, true);
+
+        var pemKey = acmeContext.AccountKey.ToPem();
+        await File.WriteAllTextAsync(Parameters.GetAccountFile(), pemKey);
+        WriteLine("Letsencrypt account created");
     }
 
     public static AsyncResult<AcmeContext, Unit> Get()

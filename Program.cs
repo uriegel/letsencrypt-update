@@ -18,7 +18,7 @@ static void DeleteAllTokens()
     => Parameters
         .GetEncryptDirectory()
         .GetFiles()
-        .Where(n => !string.IsNullOrEmpty(n.Extension))
+        .Where(n => string.IsNullOrEmpty(n.Extension))
         .ForEach(n => File.Delete(n.FullName));
 
 static Task Perform()
