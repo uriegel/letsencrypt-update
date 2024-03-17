@@ -13,7 +13,12 @@ static class Account
     public static async Task Create()
     {
         WriteLine("Creating letsencrypt account");
-        var certRequest = ReadRequest();
+
+        var certRequest = 
+                "cert.json"                
+                    .CheckIfFileExists()
+                    ?.OpenFile()
+                    ?.Use(f => JsonSerializer.Deserialize<CertRequest>(f, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }));
         if (certRequest == null)
         {
             WriteLine("You have to create a cert request json file, see https://www.nuget.org/packages/LetsencryptCert/");

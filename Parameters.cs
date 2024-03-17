@@ -1,4 +1,3 @@
-// open Certes.Acme.Resource
 using Certes.Acme;
 using CsTools.Extensions;
 

@@ -1,5 +1,3 @@
-using CsTools.Extensions;
-
 static class Extensions
 {
     public static FileInfo[] GetFiles(this string path)
