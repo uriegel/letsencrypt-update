@@ -35,11 +35,11 @@ WriteLine("Starting letsencrypt certificate handling");
 
 await (Parameters.Get() switch
 {
-    { Staging: true, Mode: OperationMode.Create } => 1.ToAsync().SideEffect(async _ => Account.Create()),
-    _ when !Certificate.CheckValidationTime() => 2.ToAsync().SideEffect(_ => Perform()),
-    _ => 3.ToAsync().SideEffect(async _ => WriteLine("No further action needed"))
+    { Staging: true, Mode: OperationMode.Create } => 1.ToAsync().SideEffectAsync(_ => Account.Create()),
+    _ when !Certificate.CheckValidationTime() => 2.ToAsync().SideEffectAwait( _ => Perform()),
+    _ => 3.ToAsync().SideEffectAsync(_ => WriteLine("No further action needed"))
 })
-    .SideEffect(async _ => DeleteAllTokens());
+    .SideEffectAsync( _ => DeleteAllTokens());
 
 WriteLine("Letsencrypt certificate handling finished");
 
@@ -50,9 +50,20 @@ static void DeleteAllTokens()
         .Where(n => !string.IsNullOrEmpty(n.Extension))
         .ForEach(n => File.Delete(n.FullName));
 
-static async Task Perform()
+static Task Perform()
 {
-//     let! acme = Account.get ()
+    Certes.AcmeContext? c= null;
+    var x = c?.NewOrder(Account.ReadRequest()?.Domains).GetOrNull(); 
+    var xx = x.GetOrNull();
+
+    var t = Account
+                .Get()
+                .SelectManyMaybe(c => xx);
+
+
+    // var t =  Account
+    //     .Get()
+    //     .SelectManyMaybe(c => c?.NewOrder(Account.ReadRequest()?.Domains))
 
 //     let getCertData () = 
 //         getCertFile ()

@@ -1,7 +1,5 @@
-// open Certes.Acme
 // open Certes.Acme.Resource
-// open System.IO
-using System.Security.Cryptography;
+using Certes.Acme;
 using CsTools.Extensions;
 
 using static System.Console;
@@ -20,8 +18,17 @@ record Parameters(
     public static Func<string> GetPfxFile { get; }
         = Memoize(InitGetPfxFile);
 
+    public static Func<string> GetCertFile { get; }
+        = Memoize(InitGetCertFile);
+
+    public static Func<string> GetAccountFile { get; }
+        = Memoize(InitGetAccountFile);
+
     public static Func<string> GetPfxPassword { get; }
         = Memoize(InitGetPfxPassword);
+
+    public static Func<Uri> GetAcmeUri { get; }
+        = Memoize(InitGetAcmeUri);
 
     static Parameters Init()
         => Environment.GetCommandLineArgs()
@@ -48,6 +55,14 @@ record Parameters(
         => GetEncryptDirectory()
             .AppendPath(Get().Staging ? "certificate-staging.pfx" : "certificate.pfx");
 
+    static string InitGetCertFile()
+        => GetEncryptDirectory()
+            .AppendPath("cert.json");
+
+    static string InitGetAccountFile()
+        => GetEncryptDirectory()
+            .AppendPath(Get().Staging ? "account-staging.pem" : "account.pem");
+
     static string InitGetPfxPassword()
         => Get()
             .Staging
@@ -58,37 +73,8 @@ record Parameters(
             ?.Trim()
             ?? "".SideEffect(_ => WriteLine("!!!NO PASSWORD!!"));
 
-    // string? GetEnvironmentVariableWithLogging(this string key)
-    //     => key
-    //         .GetEnvironmentVariable()
-    //         ?.SideEffect(v => WriteLine($"Reading environment {key}: {v}"));
-
-    // let get = 
-    //     let get () = 
-
-    //         {
-    //         }
-    //     memoizeSingle get
-
-    // let getCertFile = 
-    //     let getCertFile () = 
-    //         getEncryptDirectory ()
-    //         |> Directory.attachSubPath "cert.json"
-    //     memoizeSingle getCertFile
-
-    // let getAccountFile = 
-    //     let getName () = if (get()).Staging then "account-staging.pem" else "account.pem"
-    //     let getAccountFile () =
-    //         getEncryptDirectory ()
-    //         |> Directory.attachSubPath (getName ())
-
-    //     memoizeSingle getAccountFile
-
-    // let getAcmeUri = 
-    //     let getAcmeUri () = 
-    //         if (get()).Staging 
-    //             then WellKnownServers.LetsEncryptStagingV2 
-    //         else WellKnownServers.LetsEncryptV2    
-    //     memoizeSingle getAcmeUri
-
+    static Uri InitGetAcmeUri()
+        => Get().Staging
+            ? WellKnownServers.LetsEncryptStagingV2
+            : WellKnownServers.LetsEncryptV2;
 }

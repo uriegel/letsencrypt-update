@@ -1,12 +1,11 @@
-// open Certes
 // open Certes.Acme
-// open FSharpTools
-// open FSharpTools.Functional
-// open System.IO
-// open System.Text.Json
+using System.Text.Json;
+using Certes;
+using CsTools.Extensions;
+using CsTools.Functional;
+using static System.Console;
 
-// open Letsencryptcert
-// open Parameters
+using static CsTools.Functional.Memoization;
 
 static class Account
 {
@@ -14,14 +13,31 @@ static class Account
     {
         
     }
-}
-// let private options = JsonSerializerOptions (PropertyNameCaseInsensitive = true)
 
-// let readRequest =
-//     let readRequest requestFile =
-//         use file = File.OpenRead requestFile
-//         JsonSerializer.Deserialize<CertRequest> (file, options)
-//     memoize readRequest
+    public static Task<AcmeContext?> Get()
+    {
+        WriteLine("Reading letsencrypt account");
+
+        return Parameters
+            .GetAccountFile()
+            .ReadAllTextFromFilePath()
+            ?.Pipe(p => KeyFactory.FromPem(p))
+            ?.Pipe(k => new AcmeContext(Parameters.GetAcmeUri(), k))
+            ?.SideEffect(_ => WriteLine("Letsencrypt account read"))
+            .SideEffectAsync(a => a.Account())
+            .GetOrNull()
+            ?? Task.FromResult(null as AcmeContext);
+    }
+
+    public static Func<CertRequest?> ReadRequest { get; }
+        = MemoizeMaybe(InitReadRequest);
+
+    static CertRequest? InitReadRequest()
+        => Parameters
+                .GetCertFile()
+                .OpenFile()
+                .Use(f => JsonSerializer.Deserialize<CertRequest>(f, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }));
+}
 
 // let create () = async {
 //     printfn "Creating letsencrypt account"
@@ -51,27 +67,4 @@ static class Account
 //     printfn "Letsencrypt account created"
 // }
 
-// let get () = 
-//     printfn "Reading letsencrypt account"
-
-//     let keyFromPem pem = KeyFactory.FromPem pem
-
-//     let readPem () = 
-//         File.ReadAllTextAsync (getAccountFile ()) 
-//         |> Async.AwaitTask
-
-//     let openAccount (context: AcmeContext) = 
-//         context.Account () 
-//             |> Async.AwaitTask
-//             |> Async.Ignore
-
-//     let getAccount (accountKey: IKey) = 
-//         let result = AcmeContext (Parameters.getAcmeUri (), accountKey)
-//         printfn "Letsencrypt account read"
-//         result
-
-//     readPem ()
-//     |> Async.map keyFromPem
-//     |> Async.map getAccount
-//     |> Async.sideEffect openAccount
 

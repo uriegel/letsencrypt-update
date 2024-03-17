@@ -34,7 +34,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="cstools" Version="7.14.1" />
+    <PackageReference Include="cstools" Version="7.14.4" />
     <PackageReference Include="Webprofusion.Certes" Version="2.4.1" />
   </ItemGroup>
 </Project>
