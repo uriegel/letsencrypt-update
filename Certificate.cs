@@ -14,11 +14,10 @@ static class Certificate
             .Pipe(p =>
                 File.Exists(p)
                 ? p
-                : (null as string)
-                    .SideEffect(_ => WriteLine("Pfx file does not exist, please run -create")))
+                : null)
             ?.Pipe(p => new X509Certificate2(p, Parameters.GetPfxPassword())
                             .SideEffect(c => WriteLine($"Certificate expires: {c.NotAfter}")))
-            ?.Pipe(c => c.NotAfter > DateTime.Now + TimeSpan.FromDays(30)) != false;
+            ?.Pipe(c => c.NotAfter > DateTime.Now + TimeSpan.FromDays(30)) == true;
 
 
     public static async Task<Unit> Order(IOrderContext order)
