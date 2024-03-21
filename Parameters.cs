@@ -63,13 +63,12 @@ record Parameters(
             .AppendPath(Get().Staging ? "account-staging.pem" : "account.pem");
 
     static string InitGetPfxPassword()
-        => Get()
-            .Staging
-                ? "/etc"
-                : Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
-            .AppendPath("LetsencryptUweb")
-            .ReadAllTextFromFilePath()
-            ?.Trim()
+        => (OperatingSystem.IsLinux()
+            ? "/etc"
+            : Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData))
+            ?.AppendPath("letsencrypt-uweb")
+            ?.ReadAllTextFromFilePath()
+            ?.Trim() 
             ?? "".SideEffect(_ => WriteLine("!!!NO PASSWORD!!"));
 
     static Uri InitGetAcmeUri()

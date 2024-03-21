@@ -4,6 +4,9 @@ using static System.Console;
 
 WriteLine("Starting letsencrypt certificate handling");
 
+if (string.IsNullOrEmpty(Parameters.GetPfxPassword()))
+    throw new Exception();
+
 await (Parameters.Get() switch
 {
     { Staging: true, Mode: OperationMode.Create } => 1.ToAsync().SideEffectAwait(_ => Account.Create()),
