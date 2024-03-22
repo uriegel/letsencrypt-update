@@ -27,14 +27,14 @@ static void DeleteAllTokens()
 static Task Perform()
     => Account
                 .Get()
-                .SelectAwait(c => c.NewOrder(
+                .BindAwait(c => c.CreateNewOrder(
                                         Account
                                             .ReadRequest()
                                             ?.Domains
                                             ?.SideEffectForAll(d => WriteLine($"Registering domain: {d}"))
-                                            ?.SideEffectForAll(d => HttpChecker.Check(d).Wait())
-                                            ?.ToArray()
-                                            ?? []))
+                                            ?.ToAsyncEnumerable()
+                                            ?.WhereAwait(async d => await HttpChecker.Check(d))
+                                            ?.ToArrayAwait()))
                 .SelectError(_ => "")
                 .BindAwait(Authorizations.ValidateAll)
                 .SelectAwait(Certificate.Order)
