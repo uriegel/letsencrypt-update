@@ -5,32 +5,38 @@ using static CsTools.HttpRequest.Core;
 
 static class HttpChecker
 {
-    public static async Task<bool> Check(string url)
+    public static async Task Check(string domain)
     {
         try
         {
             var msg = await Request.RunAsync(DefaultSettings with
                 {
                     Method = HttpMethod.Get,
-                    BaseUrl = url, //"http://192.168.178.74:8080",
+                    BaseUrl = $"HTTP://{domain}",
                     Url = "/.well-known/acme-challenge/check"
                 });
-            return await msg.Content.ReadAsStringAsync() == "checked";
+            if (await msg.Content.ReadAsStringAsync() != "checked")
+                throw new HttpNotReadyException();
         }
         catch (HttpException he) when (he.InnerException is System.Net.Http.HttpRequestException hre && hre.HttpRequestError == HttpRequestError.ConnectionError)
         {
             WriteLine("HTTP server not running!");
-            return false;
+            throw new Exception();
         }
         catch (HttpException he) when (he.InnerException is System.Net.Http.HttpRequestException hre && hre.HttpRequestError == HttpRequestError.NameResolutionError)
         {
-            WriteLine($"Unknown domain {url}!");
-            return false;
+            WriteLine($"Unknown domain: {domain}!");
+            throw new Exception();
+        }
+        catch (HttpNotReadyException)
+        {
+            WriteLine("HTTP server not ready for Lets Encrypt!");
+            throw;
         }
         catch (Exception e)
         {
             WriteLine(e);
-            return false;
+            throw new Exception();
         }
     }
 }

@@ -7,8 +7,6 @@ WriteLine("Starting letsencrypt certificate handling");
 if (string.IsNullOrEmpty(Parameters.GetPfxPassword()))
     throw new Exception();
 
-var affe = await HttpChecker.Check("http://uriegel.di");
-
 await (Parameters.Get() switch
 {
     { Staging: true, Mode: OperationMode.Create } => 1.ToAsync().SideEffectAwait(_ => Account.Create()),
@@ -34,6 +32,7 @@ static Task Perform()
                                             .ReadRequest()
                                             ?.Domains
                                             ?.SideEffectForAll(d => WriteLine($"Registering domain: {d}"))
+                                            ?.SideEffectForAll(d => HttpChecker.Check(d).Wait())
                                             ?.ToArray()
                                             ?? []))
                 .SelectError(_ => "")

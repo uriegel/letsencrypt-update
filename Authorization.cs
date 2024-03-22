@@ -49,7 +49,7 @@ static class Authorizations
                 .BindAwait(ValidateChallenge);
         return AsyncResultExtensions.RepeatOnError(Validate, 7, TimeSpan.FromSeconds(3));
     }
-    // TODO check if http server is serving challange
+    
     static AsyncResult<Unit, string> ValidateChallenge(IChallengeContext challenge)
         => challenge
             .Validate()
