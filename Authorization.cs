@@ -7,6 +7,7 @@ using CsTools.Functional;
 
 using static System.Console;
 using static CsTools.Core;
+using static AspNetExtensions.LetsEncrypt; 
 
 static class Authorizations
 {
@@ -65,8 +66,7 @@ static class Authorizations
             .ToAsyncResult();
 
     static void WriteKeyTokenFile(IChallengeContext challenge)
-        => Parameters
-            .GetEncryptDirectory()
+        => GetEncryptDirectory()
             .AppendPath(challenge
                             .Token
                             .SideEffect(t => WriteLine($"Validating LetsEncrypt token: {t}")))

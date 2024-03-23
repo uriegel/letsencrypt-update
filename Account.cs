@@ -8,6 +8,7 @@ using CsTools.Functional;
 
 using static System.Console;
 using static CsTools.Functional.Memoization;
+using static AspNetExtensions.LetsEncrypt; 
 
 static class Account
 {
@@ -26,8 +27,7 @@ static class Account
             return;
         }
 
-        Parameters
-            .GetEncryptDirectory()
+        GetEncryptDirectory()
             .EnsureDirectoryExists();
 
         File.Copy("cert.json", Parameters.GetCertFile(), true);

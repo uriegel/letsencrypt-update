@@ -3,6 +3,7 @@ using CsTools.Extensions;
 
 using static System.Console;
 using static CsTools.Functional.Memoization;
+using static AspNetExtensions.LetsEncrypt; 
 
 record Parameters(
     bool Staging,
@@ -10,9 +11,6 @@ record Parameters(
 ) {
     public static Func<Parameters> Get { get; }
         = Memoize(Init);
-
-    public static Func<string> GetEncryptDirectory { get; }
-        = Memoize(InitEncryptDirectory);
 
     public static Func<string> GetPfxFile { get; }
         = Memoize(InitGetPfxFile);
@@ -41,11 +39,6 @@ record Parameters(
                 })
                     .SideEffect(WriteLine)
             );
-
-    static string InitEncryptDirectory()
-        => Environment
-            .GetFolderPath(Environment.SpecialFolder.ApplicationData)
-            .AppendPath("letsencrypt-uweb");
 
     static string InitGetPfxFile()
         => GetEncryptDirectory()

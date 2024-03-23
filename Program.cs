@@ -1,7 +1,9 @@
 ﻿using AspNetExtensions;
 using CsTools.Extensions;
 using CsTools.Functional;
+
 using static System.Console;
+using static AspNetExtensions.LetsEncrypt; 
 
 WriteLine("Starting letsencrypt certificate handling");
 
@@ -19,8 +21,7 @@ await (Parameters.Get() switch
 WriteLine("Letsencrypt certificate handling finished");
 
 static void DeleteAllTokens() 
-    => Parameters
-        .GetEncryptDirectory()
+    => GetEncryptDirectory()
         .GetFiles()
         .Where(n => string.IsNullOrEmpty(n.Extension))
         .ForEach(n => File.Delete(n.FullName));
