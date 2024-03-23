@@ -23,9 +23,6 @@ record Parameters(
     public static Func<string> GetAccountFile { get; }
         = Memoize(InitGetAccountFile);
 
-    public static Func<string> GetPfxPassword { get; }
-        = Memoize(InitGetPfxPassword);
-
     public static Func<Uri> GetAcmeUri { get; }
         = Memoize(InitGetAcmeUri);
 
@@ -61,15 +58,6 @@ record Parameters(
     static string InitGetAccountFile()
         => GetEncryptDirectory()
             .AppendPath(Get().Staging ? "account-staging.pem" : "account.pem");
-
-    static string InitGetPfxPassword()
-        => (OperatingSystem.IsLinux()
-            ? "/etc"
-            : Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData))
-            ?.AppendPath("letsencrypt-uweb")
-            ?.ReadAllTextFromFilePath()
-            ?.Trim() 
-            ?? "".SideEffect(_ => WriteLine("!!!NO PASSWORD!!"));
 
     static Uri InitGetAcmeUri()
         => Get().Staging

@@ -1,10 +1,11 @@
-﻿using CsTools.Extensions;
+﻿using AspNetExtensions;
+using CsTools.Extensions;
 using CsTools.Functional;
 using static System.Console;
 
 WriteLine("Starting letsencrypt certificate handling");
 
-if (string.IsNullOrEmpty(Parameters.GetPfxPassword()))
+if (string.IsNullOrEmpty(LetsEncrypt.GetPfxPassword()))
     throw new Exception();
 
 await (Parameters.Get() switch

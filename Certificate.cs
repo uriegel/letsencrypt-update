@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using AspNetExtensions;
 using Certes;
 using Certes.Acme;
 using CsTools;
@@ -15,7 +16,7 @@ static class Certificate
                 File.Exists(p)
                 ? p
                 : null)
-            ?.Pipe(p => new X509Certificate2(p, Parameters.GetPfxPassword())
+            ?.Pipe(p => new X509Certificate2(p, LetsEncrypt.GetPfxPassword())
                             .SideEffect(c => WriteLine($"Certificate expires: {c.NotAfter}")))
             ?.Pipe(c => c.NotAfter > DateTime.Now + TimeSpan.FromDays(30)) == true;
 
@@ -39,7 +40,7 @@ static class Certificate
         var certPem = cert.ToPem();
         var certKey = privateKey.ToPem();
         var x509 = X509Certificate2.CreateFromPem(certPem.ToCharArray(), certKey.ToCharArray());
-        var pfxBytes = x509.Export(X509ContentType.Pfx, Parameters.GetPfxPassword());
+        var pfxBytes = x509.Export(X509ContentType.Pfx, LetsEncrypt.GetPfxPassword());
         WriteLine("Saving certificate");
         File.WriteAllBytes(Parameters.GetPfxFile(), pfxBytes);
         return Unit.Value;
