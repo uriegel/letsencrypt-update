@@ -1,5 +1,4 @@
-﻿using AspNetExtensions;
-using CsTools.Extensions;
+﻿using CsTools.Extensions;
 using CsTools.Functional;
 
 using static System.Console;
@@ -7,7 +6,7 @@ using static AspNetExtensions.LetsEncrypt;
 
 WriteLine("Starting letsencrypt certificate handling");
 
-if (string.IsNullOrEmpty(LetsEncrypt.GetPfxPassword()))
+if (string.IsNullOrEmpty(GetPfxPassword()))
     throw new Exception();
 
 await (Parameters.Get() switch
@@ -28,22 +27,22 @@ static void DeleteAllTokens()
 
 static Task Perform()
     => Account
-                .Get()
-                .BindAwait(c => c.CreateNewOrder(
-                                        Account
-                                            .ReadRequest()
-                                            ?.Domains
-                                            ?.SideEffectForAll(d => WriteLine($"Registering domain: {d}"))
-                                            ?.ToAsyncEnumerable()
-                                            ?.WhereAwait(async d => await HttpChecker.Check(d))
-                                            ?.ToArrayAwait()))
-                .SelectError(_ => "")
-                .BindAwait(Authorizations.ValidateAll)
-                .SelectAwait(Certificate.Order)
-                .ToResult()
-                .SideEffectAsync(t => t.Match(
-                                    _ => WriteLine("Certificate successfully retrieved"),
-                                    e => WriteLine($"An error has occurred: {e}")));
+        .Get()
+        .BindAwait(c => c.CreateNewOrder(
+                                Account
+                                    .ReadRequest()
+                                    ?.Domains
+                                    ?.SideEffectForAll(d => WriteLine($"Registering domain: {d}"))
+                                    ?.ToAsyncEnumerable()
+                                    ?.WhereAwait(async d => await HttpChecker.Check(d))
+                                    ?.ToArrayAwait()))
+        .SelectError(_ => "")
+        .BindAwait(Authorizations.ValidateAll)
+        .SelectAwait(Certificate.Order)
+        .ToResult()
+        .SideEffectAsync(t => t.Match(
+                            _ => WriteLine("Certificate successfully retrieved"),
+                            e => WriteLine($"An error has occurred: {e}")));
                             
                 
                 
