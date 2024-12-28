@@ -8,7 +8,7 @@ use serde::Deserialize;
 pub struct Settings {
     pub account: String,
     pub domains: Vec<String>,
-    pub productive: bool
+    pub productive: Option<bool>
 }
 
 fn main() {
@@ -17,12 +17,12 @@ fn main() {
     let cert_dir = dirs::config_dir().expect("Could not find config dir")
         .join("letsencrypt-cert");
 
-    let settings = fs::read_to_string(cert_dir.join("letsencrypt-cert.conf"))
+    let settings = fs::read_to_string(cert_dir.join("conf.json"))
         .expect("Could not read settings");
     let settings: Settings = serde_json::from_str(&settings).expect("Could not extract settings");
     println!("Settings: {settings:#?}");
 
-    let url = if settings.productive { 
+    let url = if settings.productive.unwrap_or(true) { 
         DirectoryUrl::LetsEncrypt 
     } else { 
         DirectoryUrl::LetsEncryptStaging 
