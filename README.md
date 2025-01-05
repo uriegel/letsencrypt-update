@@ -9,7 +9,7 @@ sudo dnf install openssl-devel
 
 ## Executing the tool for the first time
 
-Copy ```cert.json``` to current directory with following content:
+Copy ```conf.json``` to directory: ```~/.config/letsencrypt-cert``` with following content:
 
 ```
 {
@@ -28,19 +28,9 @@ Copy ```cert.json``` to current directory with following content:
 }
 
 ```
-
-```
-letsencrypt-cert -create
-``` 
-This lets letsencrypt-cert create an account.
-
-## Errors:
-At the moment you have to call ```sudo ~/.dotnet/tools/uwebcert -create -prod``` from the directory ```/etc/letsencrypt-uweb```
-
-Webserver has to be restarted in order to take renewed certificate
-
 ## cron job running every day:
 
 ```
-sudo ~/.dotnet/tools/uwebcert -prod
+0 4 * * * /home/uwe/home_server/letsencrypt-cert > /home/uwe/logs/letsencrypt-cert.log 2>&1
 ``` 
+Webserver has to be restarted in order to take renewed certificate
